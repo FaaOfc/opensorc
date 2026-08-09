@@ -11,14 +11,14 @@ function generateRandomCode(length = 4): string {
   return result;
 }
 
-// Environment config
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
-const GITHUB_USER = process.env.GITHUB_USER || "";
-const CDN_REPO = process.env.CDN_REPO || "";
-const APP_DOMAIN = process.env.APP_DOMAIN || "http://localhost:3000";
-
 export async function POST(request: NextRequest) {
   try {
+    // Read env vars inside handler (Vercel serverless compatible)
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
+    const GITHUB_USER = process.env.GITHUB_USER || "";
+    const CDN_REPO = process.env.CDN_REPO || "";
+    const APP_DOMAIN = process.env.APP_DOMAIN || "http://localhost:3000";
+
     // Check env vars
     if (!GITHUB_TOKEN || !GITHUB_USER || !CDN_REPO) {
       return NextResponse.json(
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       const errText = await githubRes.text();
       console.error("GitHub upload error:", errText);
       return NextResponse.json(
-        { error: "Failed to upload file to GitHub." },
+        { error: `Failed to upload file to GitHub: ${errText.slice(0, 200)}` },
         { status: 500 }
       );
     }
