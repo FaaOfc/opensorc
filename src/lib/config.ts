@@ -1,7 +1,7 @@
 // Site configuration — customize these values
 export const siteConfig = {
-  siteName: "NefuSite",
-  authorName: "NefuSoft",
+  siteName: "Tao-Site",
+  authorName: "Hutao's husband",
   tagline: "Super-efficient multifunction web app",
   description:
     "A personal project for file hosting and URL shortening, powered by GitHub as a free database and storage backend.",
