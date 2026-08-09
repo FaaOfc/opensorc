@@ -35,14 +35,14 @@ const features = [
     title: "CDN Hosting",
     subtitle: "Host any file, any mimetype",
     description:
-      "Upload images, videos, documents, executables — anything. Your files are stored on GitHub and served through your own domain with proper MIME types.",
+      "Upload images, videos, documents, executables — anything. Your files are stored on Database and served through your own domain with proper MIME types.",
     icon: "upload-cloud" as const,
     color: "#f97316",
     details: [
       "Supports all MIME types",
       "Drag & drop file upload",
       "Random 4-char filenames",
-      "GitHub as free storage",
+      "24/7 Access to database",
       "Proxied through your domain",
     ],
   },
@@ -51,13 +51,13 @@ const features = [
     title: "URL Shortener",
     subtitle: "Shorten any URL instantly",
     description:
-      "Transform long URLs into short, shareable links. Optionally customize your short codes. All mappings stored in a GitHub Gist — zero cost.",
+      "Transform long URLs into short, shareable links. Optionally customize your short codes. All mappings stored in a Private Database.",
     icon: "link" as const,
     color: "#10b981",
     details: [
       "Custom short codes (optional)",
       "Random code generation",
-      "GitHub Gist as database",
+      "Self Hosted Database",
       "Instant 302 redirects",
       "Collision-safe codes",
     ],
