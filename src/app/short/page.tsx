@@ -58,7 +58,7 @@ export default function ShorturlPage() {
             <Link className="size-8 text-emerald-500" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-mono font-bold mb-1">
-            URL Shortener
+            URL Shortener - Maintenance
           </h1>
           <p className="text-sm text-gray-600 font-mono">
             Pendekkan URL panjang jadi link singkat
@@ -165,7 +165,7 @@ export default function ShorturlPage() {
           <ol className="space-y-1.5 text-xs font-mono text-gray-600">
             <li className="flex items-start gap-2">
               <span className="text-emerald-500 font-bold">1.</span>
-              URL mapping disimpan di GitHub Gist sebagai JSON
+              URL mapping disimpan di Database sebagai JSON
             </li>
             <li className="flex items-start gap-2">
               <span className="text-emerald-500 font-bold">2.</span>
