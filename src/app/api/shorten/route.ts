@@ -11,14 +11,14 @@ function generateRandomCode(length = 4): string {
   return result;
 }
 
-// Environment config
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
-const GITHUB_USER = process.env.GITHUB_USER || "";
-const GIST_ID = process.env.GIST_ID || "";
-const APP_DOMAIN = process.env.APP_DOMAIN || "http://localhost:3000";
-
 export async function POST(request: NextRequest) {
   try {
+    // Read env vars inside handler (Vercel serverless compatible)
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
+    const GITHUB_USER = process.env.GITHUB_USER || "";
+    const GIST_ID = process.env.GIST_ID || "";
+    const APP_DOMAIN = process.env.APP_DOMAIN || "http://localhost:3000";
+
     const body = await request.json();
     const { longUrl, customCode } = body;
 
@@ -52,8 +52,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!gistRes.ok) {
+      const errText = await gistRes.text();
+      console.error("Gist fetch error:", errText);
       return NextResponse.json(
-        { error: "Failed to fetch URL database." },
+        { error: `Failed to fetch URL database: ${errText.slice(0, 200)}` },
         { status: 500 }
       );
     }
@@ -102,8 +104,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!patchRes.ok) {
+      const errText = await patchRes.text();
+      console.error("Gist patch error:", errText);
       return NextResponse.json(
-        { error: "Failed to save shortened URL." },
+        { error: `Failed to save shortened URL: ${errText.slice(0, 200)}` },
         { status: 500 }
       );
     }
