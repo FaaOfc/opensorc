@@ -185,7 +185,7 @@ export default function ChatPage() {
               <MessageSquare className="size-8 text-orange-500" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-mono font-bold mb-1">
-              AI Chat
+              AI Chat - Maintenance
             </h1>
             <p className="text-sm font-mono" style={{ color: "var(--neo-muted-text)" }}>
               Login atau buat akun untuk mulai chat
