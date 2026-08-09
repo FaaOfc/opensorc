@@ -32,7 +32,7 @@ const iconMap = {
 const features = [
   {
     id: "cdn",
-    title: "CDN Hosting",
+    title: "CDN Hosting - Maintenance",
     subtitle: "Host any file, any mimetype",
     description:
       "Upload images, videos, documents, executables — anything. Your files are stored on Database and served through your own domain with proper MIME types.",
@@ -48,7 +48,7 @@ const features = [
   },
   {
     id: "shorturl",
-    title: "URL Shortener",
+    title: "URL Shortener - Maintenance",
     subtitle: "Shorten any URL instantly",
     description:
       "Transform long URLs into short, shareable links. Optionally customize your short codes. All mappings stored in a Private Database.",
@@ -96,7 +96,7 @@ const features = [
   },
   {
     id: "chat",
-    title: "AI Chat",
+    title: "AI Chat - Maintenance",
     subtitle: "Chat dengan AI assistant",
     description:
       "Chat dengan AI menggunakan Gemini atau OpenRouter. Butuh login untuk menyimpan riwayat chat. Mendukung multiple sessions.",
