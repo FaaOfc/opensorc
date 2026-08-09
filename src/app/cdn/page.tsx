@@ -76,7 +76,7 @@ export default function CdnPage() {
             <UploadCloud className="size-8 text-orange-500" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-mono font-bold mb-1">
-            CDN Hosting
+            CDN Hosting - Maintenance
           </h1>
           <p className="text-sm text-gray-600 font-mono">
             Upload file apapun, dapatkan URL instantly
@@ -200,7 +200,7 @@ export default function CdnPage() {
           <ol className="space-y-1.5 text-xs font-mono text-gray-600">
             <li className="flex items-start gap-2">
               <span className="text-orange-500 font-bold">1.</span>
-              File kamu diupload ke GitHub repository
+              File kamu diupload ke Database
             </li>
             <li className="flex items-start gap-2">
               <span className="text-orange-500 font-bold">2.</span>
