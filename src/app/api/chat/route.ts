@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
-const AI_MODEL = process.env.AI_MODEL || "google/gemini-2.0-flash-exp:free";
-
 export async function POST(request: NextRequest) {
   try {
+    // Read env vars inside handler (Vercel serverless compatible)
+    const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
+    const AI_MODEL = process.env.AI_MODEL || "google/gemini-2.0-flash-exp:free";
+
     const { userId, chatId, message } = await request.json();
 
     if (!userId || !message) {
