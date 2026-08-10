@@ -156,7 +156,7 @@ export default function ChatPage() {
                     ...c.messages,
                     {
                       role: "assistant" as const,
-                      content: `**Demo Mode** — Set \`OPENROUTER_API_KEY\` di .env untuk mengaktifkan AI.\n\nPesan kamu: "${msg}"`,
+                      content: `**Demo Mode**\n\nSebentar, Ada Yang Error\n\nPesan kamu: "${msg}"`,
                     },
                   ],
                 }
@@ -393,55 +393,81 @@ export default function ChatPage() {
             </div>
           </>
         ) : (
-          /* Welcome */
-          <div className="flex-1 flex items-center justify-center p-4">
-            <div className="text-center max-w-sm">
-              <div className="inline-flex items-center justify-center neo-border rounded-xl p-4 bg-orange-50 dark:bg-orange-950 mb-4">
-                <Sparkles className="size-10 text-orange-500" />
-              </div>
-              <h2 className="text-xl sm:text-2xl font-mono font-bold mb-2">
-                AI Chat
-              </h2>
-              <p
-                className="font-mono text-sm mb-4"
-                style={{ color: "var(--neo-muted-text)" }}
-              >
-                Chat gratis tanpa login. Pilih model, ketik pesan, langsung jalan.
-              </p>
-              <div className="neo-card p-4 text-left">
-                <h3 className="font-mono font-bold text-xs mb-2 flex items-center gap-1.5">
-                  <Sparkles className="size-3 text-orange-500" /> Model Gratis
-                </h3>
-                <ul
-                  className="space-y-1 text-xs font-mono"
+          /* Welcome — with input */
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex items-center justify-center p-4">
+              <div className="text-center max-w-sm">
+                <div className="inline-flex items-center justify-center neo-border rounded-xl p-4 bg-orange-50 dark:bg-orange-950 mb-4">
+                  <Sparkles className="size-10 text-orange-500" />
+                </div>
+                <h2 className="text-xl sm:text-2xl font-mono font-bold mb-2">
+                  AI Chat
+                </h2>
+                <p
+                  className="font-mono text-sm mb-4"
                   style={{ color: "var(--neo-muted-text)" }}
                 >
-                  {models.map((m) => (
-                    <li key={m.id} className="flex items-center gap-1.5">
-                      <span className="text-orange-500">•</span> {m.name}
+                  Chat gratis tanpa login. Ketik pesan di bawah untuk mulai.
+                </p>
+                <div className="neo-card p-4 text-left">
+                  <h3 className="font-mono font-bold text-xs mb-2 flex items-center gap-1.5">
+                    <Sparkles className="size-3 text-orange-500" /> Model: {modelName}
+                  </h3>
+                  <ul
+                    className="space-y-1 text-xs font-mono"
+                    style={{ color: "var(--neo-muted-text)" }}
+                  >
+                    <li className="flex items-center gap-1.5">
+                      <span className="text-orange-500">•</span> 5 model free
                     </li>
-                  ))}
-                  {models.length === 0 && (
-                    <>
-                      <li className="flex items-center gap-1.5">
-                        <span className="text-orange-500">•</span> Gemini 2.0 Flash
-                      </li>
-                      <li className="flex items-center gap-1.5">
-                        <span className="text-orange-500">•</span> Llama 3.1 8B
-                      </li>
-                      <li className="flex items-center gap-1.5">
-                        <span className="text-orange-500">•</span> Qwen 2.5 7B
-                      </li>
-                      <li className="flex items-center gap-1.5">
-                        <span className="text-orange-500">•</span> Mistral 7B
-                      </li>
-                      <li className="flex items-center gap-1.5">
-                        <span className="text-orange-500">•</span> DeepSeek R1
-                      </li>
-                    </>
-                  )}
-                </ul>
+                    <li className="flex items-center gap-1.5">
+                      <span className="text-orange-500">•</span> Tanpa login
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <span className="text-orange-500">•</span> $0 per token
+                    </li>
+                  </ul>
+                </div>
               </div>
+            </div>
+
+            {/* Input at bottom of welcome screen */}
+            <div
+              className="p-3 border-t-2"
+              style={{ borderColor: "var(--neo-border-color)" }}
+            >
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSend();
+                }}
+                className="flex gap-2"
+              >
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ketik pesan untuk mulai chat..."
+                  disabled={sending}
+                  autoFocus
+                  className="neo-border rounded-lg flex-1 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-[var(--neo-card-bg)]"
+                />
+                <button
+                  type="submit"
+                  disabled={!input.trim() || sending}
+                  className={`neo-btn px-4 py-2 font-mono font-medium text-sm flex items-center gap-2 shrink-0 ${
+                    !input.trim() || sending
+                      ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed shadow-none"
+                      : "bg-[var(--neo-border-color)] text-[var(--neo-card-bg)]"
+                  }`}
+                >
+                  {sending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Send className="size-4" />
+                  )}
+                </button>
+              </form>
             </div>
           </div>
         )}
