@@ -96,7 +96,7 @@ const features = [
   },
   {
     id: "chat",
-    title: "AI Chat - Maintenance",
+    title: "AI Chat",
     subtitle: "Chat dengan AI assistant",
     description:
       "Chat dengan AI menggunakan Gemini atau OpenRouter. Butuh login untuk menyimpan riwayat chat. Mendukung multiple sessions.",
@@ -107,7 +107,7 @@ const features = [
       "Chat history tersimpan",
       "Multiple sessions",
       "Markdown formatting",
-      "Login dengan akun",
+      "Gratis tanpa akun",
     ],
   },
 ];
