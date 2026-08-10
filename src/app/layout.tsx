@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NefuSite — CDN & ShortURL & Downloader & AI Chat",
+  title: "TaoSite — CDN & ShortURL & Downloader & AI Chat",
   description:
     "Super-efficient multifunction web app. Free CDN hosting, URL shortener, social media downloader, and AI chat.",
 };
