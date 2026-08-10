@@ -7,268 +7,279 @@ import {
   Loader2,
   Plus,
   Trash2,
-  LogIn,
-  UserPlus,
-  LogOut,
-  X,
-  KeyRound,
+  ChevronDown,
+  Sparkles,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
-// ===================== AUTH STATE =====================
-interface AuthUser {
-  id: string;
-  username: string;
-  name: string;
-  email: string;
+// ===================== TYPES =====================
+interface Msg {
+  role: "user" | "assistant";
+  content: string;
 }
 
-interface ChatInfo {
+interface LocalChat {
   id: string;
   title: string;
-  messages: { id: string; role: string; content: string; createdAt: string }[];
+  model: string;
+  messages: Msg[];
+  createdAt: number;
 }
 
-// ===================== MAIN COMPONENT =====================
+interface ModelInfo {
+  id: string;
+  name: string;
+}
+
+const STORAGE_KEY = "nefu_chats";
+const MODEL_KEY = "nefu_model";
+
+// ===================== MAIN =====================
 export default function ChatPage() {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [showAuth, setShowAuth] = useState<"login" | "register" | null>(null);
-  const [chats, setChats] = useState<ChatInfo[]>([]);
-  const [activeChat, setActiveChat] = useState<ChatInfo | null>(null);
+  const [chats, setChats] = useState<LocalChat[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
-  const [loadingChats, setLoadingChats] = useState(false);
+  const [models, setModels] = useState<ModelInfo[]>([]);
+  const [selectedModel, setSelectedModel] = useState("google/gemini-2.0-flash-exp:free");
+  const [showModelPicker, setShowModelPicker] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Load user from sessionStorage on mount
+  const activeChat = chats.find((c) => c.id === activeId) || null;
+
+  // Load from localStorage
   useEffect(() => {
-    const stored = sessionStorage.getItem("nefu_user");
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch {}
-    }
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) setChats(JSON.parse(stored));
+      const savedModel = localStorage.getItem(MODEL_KEY);
+      if (savedModel) setSelectedModel(savedModel);
+    } catch {}
+    setLoaded(true);
   }, []);
 
-  // Load chats when user changes
+  // Fetch models
   useEffect(() => {
-    if (user) {
-      loadChats();
-      setShowAuth(null);
-    } else {
-      setChats([]);
-      setActiveChat(null);
-    }
-  }, [user?.id]);
+    fetch("/api/chat")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.models) setModels(d.models);
+      })
+      .catch(() => {});
+  }, []);
 
-  // Scroll to bottom on new messages
+  // Save to localStorage
+  useEffect(() => {
+    if (!loaded) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+    } catch {}
+  }, [chats, loaded]);
+
+  // Scroll
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeChat?.messages?.length]);
 
-  const loadChats = async () => {
-    if (!user) return;
-    setLoadingChats(true);
-    try {
-      const res = await fetch(`/api/chats?userId=${user.id}`);
-      const data = await res.json();
-      if (data.chats) setChats(data.chats);
-    } catch {}
-    setLoadingChats(false);
-  };
+  const modelName = models.find((m) => m.id === selectedModel)?.name || selectedModel.split("/").pop()?.replace(":free", "") || "AI";
 
   const handleSend = useCallback(async () => {
-    if (!input.trim() || !user || sending) return;
+    if (!input.trim() || sending) return;
     const msg = input.trim();
     setInput("");
     setSending(true);
 
-    // Optimistically add user message
-    let currentChat = activeChat;
-    if (!currentChat) {
-      currentChat = {
-        id: "",
-        title: msg.slice(0, 50),
-        messages: [{ id: "tmp", role: "user", content: msg, createdAt: new Date().toISOString() }],
+    // Add user message
+    let chatId = activeId;
+    let updatedChats = [...chats];
+
+    if (!chatId) {
+      // Create new chat
+      const newChat: LocalChat = {
+        id: Date.now().toString(),
+        title: msg.slice(0, 40),
+        model: selectedModel,
+        messages: [{ role: "user", content: msg }],
+        createdAt: Date.now(),
       };
-      setActiveChat(currentChat);
+      chatId = newChat.id;
+      updatedChats = [newChat, ...updatedChats];
     } else {
-      const updated = {
-        ...currentChat,
-        messages: [
-          ...currentChat.messages,
-          { id: "tmp2", role: "user", content: msg, createdAt: new Date().toISOString() },
-        ],
-      };
-      setActiveChat(updated);
-      currentChat = updated;
+      updatedChats = updatedChats.map((c) =>
+        c.id === chatId
+          ? { ...c, messages: [...c.messages, { role: "user", content: msg }] }
+          : c
+      );
     }
+
+    setChats(updatedChats);
+    setActiveId(chatId);
+
+    // Get messages for API
+    const chatForApi = updatedChats.find((c) => c.id === chatId);
+    const apiMessages = (chatForApi?.messages || []).map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
 
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user.id,
-          chatId: currentChat.id || undefined,
-          message: msg,
-        }),
+        body: JSON.stringify({ messages: apiMessages, model: selectedModel }),
       });
 
       const data = await res.json();
 
-      if (data.chatId) {
-        // Reload chats to get fresh data
-        await loadChats();
-        const freshChat = chats.find((c) => c.id === data.chatId);
-        if (freshChat) {
-          setActiveChat({
-            ...freshChat,
-            messages: [
-              ...freshChat.messages,
-              { id: "tmp3", role: "user", content: msg, createdAt: new Date().toISOString() },
-              { id: "ai", role: "assistant", content: data.content, createdAt: new Date().toISOString() },
-            ],
-          });
-        } else {
-          // New chat created, reload
-          const chatsRes = await fetch(`/api/chats?userId=${user.id}`);
-          const chatsData = await chatsRes.json();
-          if (chatsData.chats) {
-            setChats(chatsData.chats);
-            const newChat = chatsData.chats.find((c: ChatInfo) => c.id === data.chatId);
-            if (newChat) setActiveChat(newChat);
-          }
-        }
+      if (data.error && !data.demo) {
+        setChats((prev) =>
+          prev.map((c) =>
+            c.id === chatId
+              ? {
+                  ...c,
+                  messages: [
+                    ...c.messages,
+                    { role: "assistant" as const, content: `⚠️ ${data.error}` },
+                  ],
+                }
+              : c
+          )
+        );
+      } else if (data.demo) {
+        setChats((prev) =>
+          prev.map((c) =>
+            c.id === chatId
+              ? {
+                  ...c,
+                  messages: [
+                    ...c.messages,
+                    {
+                      role: "assistant" as const,
+                      content: `**Demo Mode** — Set \`OPENROUTER_API_KEY\` di .env untuk mengaktifkan AI.\n\nPesan kamu: "${msg}"`,
+                    },
+                  ],
+                }
+              : c
+          )
+        );
+      } else if (data.content) {
+        setChats((prev) =>
+          prev.map((c) =>
+            c.id === chatId
+              ? {
+                  ...c,
+                  messages: [
+                    ...c.messages,
+                    { role: "assistant" as const, content: data.content },
+                  ],
+                }
+              : c
+          )
+        );
       }
     } catch {
-      // Add error message
-      if (activeChat) {
-        setActiveChat({
-          ...activeChat,
-          messages: [
-            ...activeChat.messages,
-            { id: "err", role: "assistant", content: "Gagal menghubungi server.", createdAt: new Date().toISOString() },
-          ],
-        });
-      }
+      setChats((prev) =>
+        prev.map((c) =>
+          c.id === chatId
+            ? {
+                ...c,
+                messages: [
+                  ...c.messages,
+                  { role: "assistant" as const, content: "❌ Gagal menghubungi server." },
+                ],
+              }
+            : c
+        )
+      );
     } finally {
       setSending(false);
     }
-  }, [input, user, sending, activeChat, chats]);
+  }, [input, sending, activeId, chats, selectedModel]);
 
-  const handleDeleteChat = async (chatId: string) => {
-    if (!user) return;
-    await fetch(`/api/chats?chatId=${chatId}&userId=${user.id}`, { method: "DELETE" });
-    if (activeChat?.id === chatId) setActiveChat(null);
-    await loadChats();
+  const handleNewChat = () => setActiveId(null);
+
+  const handleDeleteChat = (id: string) => {
+    setChats((prev) => prev.filter((c) => c.id !== id));
+    if (activeId === id) setActiveId(null);
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("nefu_user");
-    setUser(null);
-    setActiveChat(null);
-    setChats([]);
+  const handleSelectModel = (id: string) => {
+    setSelectedModel(id);
+    localStorage.setItem(MODEL_KEY, id);
+    setShowModelPicker(false);
   };
 
-  const handleNewChat = () => {
-    setActiveChat(null);
-  };
-
-  // ===================== NOT LOGGED IN =====================
-  if (!user) {
-    return (
-      <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center py-8 px-4">
-        <div className="w-full max-w-sm">
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center neo-border rounded-xl p-3 bg-orange-50 dark:bg-orange-950 mb-4">
-              <MessageSquare className="size-8 text-orange-500" />
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-mono font-bold mb-1">
-              AI Chat - Maintenance
-            </h1>
-            <p className="text-sm font-mono" style={{ color: "var(--neo-muted-text)" }}>
-              Login atau buat akun untuk mulai chat
-            </p>
-          </div>
-
-          <div className="neo-card p-5 flex flex-col gap-3">
-            <button
-              onClick={() => setShowAuth("login")}
-              className="neo-btn bg-[var(--neo-border-color)] text-[var(--neo-card-bg)] py-3 font-mono font-medium text-sm flex items-center justify-center gap-2 shadow-none translate-x-[3px] translate-y-[3px]"
-            >
-              <LogIn className="size-4" /> Login
-            </button>
-            <button
-              onClick={() => setShowAuth("register")}
-              className="neo-btn bg-[var(--neo-card-bg)] py-3 font-mono font-medium text-sm flex items-center justify-center gap-2"
-            >
-              <UserPlus className="size-4" /> Buat Akun
-            </button>
-          </div>
-
-          <div className="mt-4 neo-card p-4">
-            <h3 className="font-mono font-bold text-sm mb-2 flex items-center gap-2">
-              <KeyRound className="size-4 text-orange-500" /> Fitur AI Chat
-            </h3>
-            <ul className="space-y-1.5 text-xs font-mono" style={{ color: "var(--neo-muted-text)" }}>
-              <li>• Chat dengan AI (Gemini / OpenRouter)</li>
-              <li>• Riwayat chat tersimpan</li>
-              <li>• Multiple chat sessions</li>
-              <li>• Markdown formatting</li>
-            </ul>
-          </div>
-
-          {/* Auth Modals */}
-          {showAuth && (
-            <AuthModal
-              mode={showAuth}
-              onClose={() => setShowAuth(null)}
-              onAuth={(u) => {
-                setUser(u);
-                sessionStorage.setItem("nefu_user", JSON.stringify(u));
-              }}
-            />
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // ===================== LOGGED IN =====================
+  // ===================== RENDER =====================
   return (
     <div className="min-h-[calc(100vh-3.5rem)] flex flex-col sm:flex-row">
       {/* Sidebar */}
-      <div className="w-full sm:w-64 border-b-2 sm:border-b-0 sm:border-r-2 flex flex-col" style={{ borderColor: "var(--neo-border-color)" }}>
-        <div className="p-3 flex items-center justify-between border-b-2" style={{ borderColor: "var(--neo-border-color)" }}>
-          <span className="font-mono font-bold text-sm truncate">
-            Halo, {user.name}!
+      <div
+        className="w-full sm:w-64 border-b-2 sm:border-b-0 sm:border-r-2 flex flex-col shrink-0"
+        style={{ borderColor: "var(--neo-border-color)" }}
+      >
+        <div
+          className="p-3 flex items-center justify-between border-b-2"
+          style={{ borderColor: "var(--neo-border-color)" }}
+        >
+          <span className="font-mono font-bold text-sm flex items-center gap-1.5">
+            <Sparkles className="size-4 text-orange-500" /> AI Chat
           </span>
-          <div className="flex gap-1">
+          <button
+            onClick={handleNewChat}
+            className="neo-btn p-1.5 bg-[var(--neo-card-bg)]"
+            title="New chat"
+          >
+            <Plus className="size-4" />
+          </button>
+        </div>
+
+        {/* Model Picker */}
+        <div
+          className="p-2 border-b-2"
+          style={{ borderColor: "var(--neo-border-color)" }}
+        >
+          <div className="relative">
             <button
-              onClick={handleNewChat}
-              className="neo-btn p-1.5 bg-[var(--neo-card-bg)]"
-              title="New chat"
+              onClick={() => setShowModelPicker(!showModelPicker)}
+              className="neo-btn w-full px-3 py-1.5 font-mono text-xs flex items-center justify-between gap-1 bg-[var(--neo-card-bg)]"
             >
-              <Plus className="size-4" />
+              <span className="truncate">{modelName}</span>
+              <ChevronDown className="size-3 shrink-0" />
             </button>
-            <button
-              onClick={handleLogout}
-              className="neo-btn p-1.5 bg-[var(--neo-card-bg)]"
-              title="Logout"
-            >
-              <LogOut className="size-4" />
-            </button>
+            {showModelPicker && (
+              <div
+                className="absolute top-full left-0 right-0 z-10 mt-1 neo-border rounded-md bg-[var(--neo-card-bg)] overflow-hidden"
+                style={{ boxShadow: "3px 3px 0px var(--neo-shadow-color)" }}
+              >
+                {models.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => handleSelectModel(m.id)}
+                    className={`w-full px-3 py-2 font-mono text-xs text-left hover:bg-orange-50 dark:hover:bg-orange-950 transition-colors ${
+                      m.id === selectedModel
+                        ? "bg-orange-50 dark:bg-orange-950 font-bold text-orange-600 dark:text-orange-400"
+                        : ""
+                    }`}
+                  >
+                    {m.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2 space-y-1" style={{ maxHeight: "calc(100vh - 8rem)" }}>
-          {loadingChats ? (
-            <div className="flex justify-center py-4">
-              <Loader2 className="size-5 animate-spin" style={{ color: "var(--neo-muted-text)" }} />
-            </div>
-          ) : chats.length === 0 ? (
-            <p className="text-xs font-mono text-center py-4" style={{ color: "var(--neo-muted-text)" }}>
+        {/* Chat list */}
+        <div
+          className="flex-1 overflow-y-auto p-2 space-y-1"
+          style={{ maxHeight: "calc(100vh - 12rem)" }}
+        >
+          {chats.length === 0 ? (
+            <p
+              className="text-xs font-mono text-center py-4"
+              style={{ color: "var(--neo-muted-text)" }}
+            >
               Belum ada chat
             </p>
           ) : (
@@ -276,11 +287,17 @@ export default function ChatPage() {
               <div
                 key={chat.id}
                 className={`flex items-center gap-2 p-2 rounded-md cursor-pointer group ${
-                  activeChat?.id === chat.id
+                  activeId === chat.id
                     ? "bg-[var(--neo-border-color)] text-[var(--neo-card-bg)]"
                     : "hover:opacity-80"
                 }`}
-                onClick={() => setActiveChat(chat)}
+                onClick={() => {
+                  setActiveId(chat.id);
+                  if (chat.model) {
+                    setSelectedModel(chat.model);
+                    localStorage.setItem(MODEL_KEY, chat.model);
+                  }
+                }}
               >
                 <MessageSquare className="size-3.5 shrink-0" />
                 <span className="text-xs font-mono font-medium truncate flex-1">
@@ -303,14 +320,19 @@ export default function ChatPage() {
 
       {/* Chat Area */}
       <div className="flex-1 flex flex-col min-h-0">
-        {activeChat || !chats.length ? (
+        {activeChat ? (
           <>
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 chat-scroll" style={{ maxHeight: "calc(100vh - 10rem)" }}>
-              {(activeChat?.messages || []).map((msg, i) => (
+            <div
+              className="flex-1 overflow-y-auto p-4 space-y-4 chat-scroll"
+              style={{ maxHeight: "calc(100vh - 10rem)" }}
+            >
+              {activeChat.messages.map((msg, i) => (
                 <div
-                  key={msg.id || i}
-                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in-up`}
+                  key={i}
+                  className={`flex ${
+                    msg.role === "user" ? "justify-end" : "justify-start"
+                  } animate-fade-in-up`}
                 >
                   <div
                     className={`max-w-[80%] p-3 rounded-lg text-sm leading-relaxed ${
@@ -333,7 +355,10 @@ export default function ChatPage() {
             </div>
 
             {/* Input */}
-            <div className="p-3 border-t-2" style={{ borderColor: "var(--neo-border-color)" }}>
+            <div
+              className="p-3 border-t-2"
+              style={{ borderColor: "var(--neo-border-color)" }}
+            >
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -368,165 +393,57 @@ export default function ChatPage() {
             </div>
           </>
         ) : (
-          /* No active chat */
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <MessageSquare
-                className="size-12 mx-auto mb-3 opacity-20"
-              />
-              <p className="font-mono text-sm" style={{ color: "var(--neo-muted-text)" }}>
-                Pilih chat atau buat baru
-              </p>
-              <button
-                onClick={handleNewChat}
-                className="neo-btn mt-3 px-4 py-2 font-mono font-medium text-sm bg-[var(--neo-card-bg)] flex items-center gap-2 mx-auto"
+          /* Welcome */
+          <div className="flex-1 flex items-center justify-center p-4">
+            <div className="text-center max-w-sm">
+              <div className="inline-flex items-center justify-center neo-border rounded-xl p-4 bg-orange-50 dark:bg-orange-950 mb-4">
+                <Sparkles className="size-10 text-orange-500" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-mono font-bold mb-2">
+                AI Chat
+              </h2>
+              <p
+                className="font-mono text-sm mb-4"
+                style={{ color: "var(--neo-muted-text)" }}
               >
-                <Plus className="size-4" /> Chat Baru
-              </button>
+                Chat gratis tanpa login. Pilih model, ketik pesan, langsung jalan.
+              </p>
+              <div className="neo-card p-4 text-left">
+                <h3 className="font-mono font-bold text-xs mb-2 flex items-center gap-1.5">
+                  <Sparkles className="size-3 text-orange-500" /> Model Gratis
+                </h3>
+                <ul
+                  className="space-y-1 text-xs font-mono"
+                  style={{ color: "var(--neo-muted-text)" }}
+                >
+                  {models.map((m) => (
+                    <li key={m.id} className="flex items-center gap-1.5">
+                      <span className="text-orange-500">•</span> {m.name}
+                    </li>
+                  ))}
+                  {models.length === 0 && (
+                    <>
+                      <li className="flex items-center gap-1.5">
+                        <span className="text-orange-500">•</span> Gemini 2.0 Flash
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <span className="text-orange-500">•</span> Llama 3.1 8B
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <span className="text-orange-500">•</span> Qwen 2.5 7B
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <span className="text-orange-500">•</span> Mistral 7B
+                      </li>
+                      <li className="flex items-center gap-1.5">
+                        <span className="text-orange-500">•</span> DeepSeek R1
+                      </li>
+                    </>
+                  )}
+                </ul>
+              </div>
             </div>
           </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ===================== AUTH MODAL =====================
-function AuthModal({
-  mode,
-  onClose,
-  onAuth,
-}: {
-  mode: "login" | "register";
-  onClose: () => void;
-  onAuth: (user: AuthUser) => void;
-}) {
-  const [username, setUsername] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const body =
-        mode === "login"
-          ? { username, password }
-          : { username, name, email, password };
-
-      const res = await fetch(`/api/auth/${mode}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Gagal");
-        return;
-      }
-
-      onAuth(data);
-    } catch {
-      setError("Gagal menghubungi server");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="neo-card p-5 sm:p-6 w-full max-w-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-mono font-bold text-lg">
-            {mode === "login" ? "Login" : "Buat Akun"}
-          </h2>
-          <button onClick={onClose} className="neo-btn p-1.5 bg-[var(--neo-card-bg)]">
-            <X className="size-4" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label className="font-mono text-xs font-bold mb-1 block">Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="neo-border rounded-md w-full px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-[var(--neo-card-bg)]"
-            />
-          </div>
-
-          {mode === "register" && (
-            <>
-              <div>
-                <label className="font-mono text-xs font-bold mb-1 block">Nama</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="neo-border rounded-md w-full px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-[var(--neo-card-bg)]"
-                />
-              </div>
-              <div>
-                <label className="font-mono text-xs font-bold mb-1 block">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="neo-border rounded-md w-full px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-[var(--neo-card-bg)]"
-                />
-              </div>
-            </>
-          )}
-
-          <div>
-            <label className="font-mono text-xs font-bold mb-1 block">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="neo-border rounded-md w-full px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-[var(--neo-card-bg)]"
-            />
-            {mode === "register" && (
-              <p className="text-xs font-mono mt-1" style={{ color: "var(--neo-muted-text)" }}>
-                Minimal 6 karakter
-              </p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="neo-btn w-full py-2.5 font-mono font-medium text-sm flex items-center justify-center gap-2 bg-[var(--neo-border-color)] text-[var(--neo-card-bg)]"
-          >
-            {loading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : mode === "login" ? (
-              <>
-                <LogIn className="size-4" /> Login
-              </>
-            ) : (
-              <>
-                <UserPlus className="size-4" /> Buat Akun
-              </>
-            )}
-          </button>
-        </form>
-
-        {error && (
-          <p className="mt-3 font-mono text-xs text-red-500 text-center">{error}</p>
         )}
       </div>
     </div>
