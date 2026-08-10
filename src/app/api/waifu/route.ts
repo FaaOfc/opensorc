@@ -8,14 +8,14 @@ export async function POST(request: NextRequest) {
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json(
-        { error: "prompt (character definition) is required." },
+        { error: "Promt (Definisi Karakter) Diperlukan." },
         { status: 400 }
       );
     }
 
     if (!query || typeof query !== "string") {
       return NextResponse.json(
-        { error: "query (user message) is required." },
+        { error: "Pesan (Pesan Pengguna) Dibutuhkan." },
         { status: 400 }
       );
     }
