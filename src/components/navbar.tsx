@@ -25,6 +25,7 @@ const navItems = [
   { href: "/ttdl", label: "TikTok DL", icon: Music2 },
   { href: "/igdl", label: "IG DL", icon: Camera },
   { href: "/chat", label: "AI Chat", icon: MessageSquare },
+  { href: "/ai-waifu", label: "AI Waifu", icon: MessageSquare },
 ];
 
 export default function Navbar() {
