@@ -41,7 +41,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [models, setModels] = useState<ModelInfo[]>([]);
-  const [selectedModel, setSelectedModel] = useState("google/gemini-2.0-flash-exp:free");
+  const [selectedModel, setSelectedModel] = useState("openai/gpt-5.5");
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -82,7 +82,7 @@ export default function ChatPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeChat?.messages?.length]);
 
-  const modelName = models.find((m) => m.id === selectedModel)?.name || selectedModel.split("/").pop()?.replace(":free", "") || "AI";
+  const modelName = models.find((m) => m.id === selectedModel)?.name || selectedModel.split("/").pop() || "AI";
 
   const handleSend = useCallback(async () => {
     if (!input.trim() || sending) return;
@@ -132,7 +132,7 @@ export default function ChatPage() {
 
       const data = await res.json();
 
-      if (data.error && !data.demo) {
+      if (data.error) {
         setChats((prev) =>
           prev.map((c) =>
             c.id === chatId
@@ -141,23 +141,6 @@ export default function ChatPage() {
                   messages: [
                     ...c.messages,
                     { role: "assistant" as const, content: `⚠️ ${data.error}` },
-                  ],
-                }
-              : c
-          )
-        );
-      } else if (data.demo) {
-        setChats((prev) =>
-          prev.map((c) =>
-            c.id === chatId
-              ? {
-                  ...c,
-                  messages: [
-                    ...c.messages,
-                    {
-                      role: "assistant" as const,
-                      content: `**Demo Mode**\n\nSebentar, Ada Yang Error\n\nPesan kamu: "${msg}"`,
-                    },
                   ],
                 }
               : c
@@ -418,13 +401,13 @@ export default function ChatPage() {
                     style={{ color: "var(--neo-muted-text)" }}
                   >
                     <li className="flex items-center gap-1.5">
-                      <span className="text-orange-500">•</span> 5 model free
+                      <span className="text-orange-500">•</span> 24 model AI premium
                     </li>
                     <li className="flex items-center gap-1.5">
                       <span className="text-orange-500">•</span> Tanpa login
                     </li>
                     <li className="flex items-center gap-1.5">
-                      <span className="text-orange-500">•</span> $0 per token
+                      <span className="text-orange-500">•</span> Gratis via ChatDay
                     </li>
                   </ul>
                 </div>
