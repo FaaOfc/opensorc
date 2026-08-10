@@ -1,116 +1,88 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
 
+const FREE_MODELS = [
+  { id: "google/gemini-2.0-flash-exp:free", name: "Gemini 2.0 Flash" },
+  { id: "meta-llama/llama-3.1-8b-instruct:free", name: "Llama 3.1 8B" },
+  { id: "qwen/qwen-2.5-7b-instruct:free", name: "Qwen 2.5 7B" },
+  { id: "mistralai/mistral-7b-instruct:free", name: "Mistral 7B" },
+  { id: "deepseek/deepseek-r1:free", name: "DeepSeek R1" },
+];
+
+// GET — list available models
+export async function GET() {
+  return NextResponse.json({ models: FREE_MODELS });
+}
+
+// POST — send message
 export async function POST(request: NextRequest) {
   try {
-    // Read env vars inside handler (Vercel serverless compatible)
     const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
-    const AI_MODEL = process.env.AI_MODEL || "google/gemini-2.0-flash-exp:free";
 
-    const { userId, chatId, message } = await request.json();
+    const { messages, model } = await request.json();
 
-    if (!userId || !message) {
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
-        { error: "userId and message are required." },
+        { error: "messages array is required." },
         { status: 400 }
       );
     }
 
-    // Verify user exists
-    const user = await db.user.findUnique({ where: { id: userId } });
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Get or create chat
-    let chat;
-    if (chatId) {
-      chat = await db.chat.findUnique({
-        where: { id: chatId },
-        include: { messages: { orderBy: { createdAt: "asc" } } },
-      });
-      if (!chat || chat.userId !== userId) {
-        return NextResponse.json({ error: "Chat not found" }, { status: 404 });
-      }
-    } else {
-      chat = await db.chat.create({
-        data: { userId, title: message.slice(0, 50) },
-        include: { messages: true },
-      });
-    }
-
-    // Save user message
-    await db.message.create({
-      data: { chatId: chat.id, role: "user", content: message },
-    });
-
-    // Get all messages for context
-    const allMessages = await db.message.findMany({
-      where: { chatId: chat.id },
-      orderBy: { createdAt: "asc" },
-    });
-
-    // Call AI API
-    let aiResponse: string;
-
-    if (OPENROUTER_API_KEY) {
-      const apiMessages = allMessages.map((m) => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
-      }));
-
-      const res = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
+    if (!OPENROUTER_API_KEY) {
+      return NextResponse.json(
         {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://nefusite.app",
-            "X-Title": "NefuSite AI Chat",
-          },
-          body: JSON.stringify({
-            model: AI_MODEL,
-            messages: [
-              {
-                role: "system",
-                content:
-                  "You are a helpful AI assistant inside NefuSite. Be concise, friendly, and helpful. Use markdown formatting when appropriate.",
-              },
-              ...apiMessages,
-            ],
-          }),
-        }
+          error: "Set OPENROUTER_API_KEY di .env untuk mengaktifkan AI.",
+          demo: true,
+        },
+        { status: 200 }
       );
-
-      if (!res.ok) {
-        const err = await res.text();
-        console.error("OpenRouter error:", err);
-        aiResponse = "Maaf, AI sedang tidak tersedia. Coba lagi nanti.";
-      } else {
-        const data = await res.json();
-        aiResponse =
-          data.choices?.[0]?.message?.content ||
-          "Maaf, tidak ada respons dari AI.";
-      }
-    } else {
-      aiResponse = `**Demo Mode** — Set OPENROUTER_API_KEY di .env untuk mengaktifkan AI.\n\nPesan kamu: "${message}"\n\nUntuk setup:\n1. Daftar di openrouter.ai\n2. Dapatkan API key\n3. Tambahkan OPENROUTER_API_KEY ke .env`;
     }
 
-    // Save AI response
-    await db.message.create({
-      data: { chatId: chat.id, role: "assistant", content: aiResponse },
-    });
+    const selectedModel = model || "google/gemini-2.0-flash-exp:free";
 
-    return NextResponse.json({
-      chatId: chat.id,
-      role: "assistant",
-      content: aiResponse,
-    });
-  } catch (error) {
+    const res = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://nefusite.app",
+          "X-Title": "Tao-Site AI Chat",
+        },
+        body: JSON.stringify({
+          model: selectedModel,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a helpful AI assistant inside Tao-Site. Be concise, friendly, and helpful. Use markdown formatting when appropriate.",
+            },
+            ...messages,
+          ],
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("OpenRouter error:", err);
+      return NextResponse.json(
+        { error: `AI error: ${err.slice(0, 300)}` },
+        { status: 502 }
+      );
+    }
+
+    const data = await res.json();
+    const content =
+      data.choices?.[0]?.message?.content ||
+      "Maaf, tidak ada respons dari AI.";
+
+    return NextResponse.json({ content, model: selectedModel });
+  } catch (error: unknown) {
     console.error("Chat error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: "Gagal memproses pesan." },
+      { error: `Gagal memproses pesan: ${msg}` },
       { status: 500 }
     );
   }
