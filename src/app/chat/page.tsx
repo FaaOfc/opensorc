@@ -401,13 +401,13 @@ export default function ChatPage() {
                     style={{ color: "var(--neo-muted-text)" }}
                   >
                     <li className="flex items-center gap-1.5">
-                      <span className="text-orange-500">•</span> 24 model AI premium
+                      <span className="text-orange-500">•</span> 24 Model AI Premium
                     </li>
                     <li className="flex items-center gap-1.5">
-                      <span className="text-orange-500">•</span> Tanpa login
+                      <span className="text-orange-500">•</span> Tanpa Login
                     </li>
                     <li className="flex items-center gap-1.5">
-                      <span className="text-orange-500">•</span> Gratis via ChatDay
+                      <span className="text-orange-500">•</span> Gratis Selamanya ( Asal Tau Diri )
                     </li>
                   </ul>
                 </div>
