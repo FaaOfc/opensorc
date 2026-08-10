@@ -18,6 +18,7 @@ import {
   ExternalLink,
   MousePointerClick,
   Server,
+  Heart,
 } from "lucide-react";
 import { siteConfig } from "@/lib/config";
 
@@ -27,37 +28,38 @@ const iconMap = {
   github: Github,
   palette: Palette,
   message: MessageSquare,
+  heart: Heart,
 };
 
 const features = [
   {
     id: "cdn",
-    title: "CDN Hosting - Maintenance",
+    title: "CDN Hosting",
     subtitle: "Host any file, any mimetype",
     description:
-      "Upload images, videos, documents, executables — anything. Your files are stored on Database and served through your own domain with proper MIME types.",
+      "Upload images, videos, documents, executables — anything. Your files are stored on GitHub and served through your own domain with proper MIME types.",
     icon: "upload-cloud" as const,
     color: "#f97316",
     details: [
       "Supports all MIME types",
       "Drag & drop file upload",
       "Random 4-char filenames",
-      "24/7 Access to database",
+      "24/7 access data to storage",
       "Proxied through your domain",
     ],
   },
   {
     id: "shorturl",
-    title: "URL Shortener - Maintenance",
+    title: "URL Shortener",
     subtitle: "Shorten any URL instantly",
     description:
-      "Transform long URLs into short, shareable links. Optionally customize your short codes. All mappings stored in a Private Database.",
+      "Transform long URLs into short, shareable links. Optionally customize your short codes. All mappings stored in a GitHub Gist — zero cost.",
     icon: "link" as const,
     color: "#10b981",
     details: [
       "Custom short codes (optional)",
       "Random code generation",
-      "Self Hosted Database",
+      "Private database",
       "Instant 302 redirects",
       "Collision-safe codes",
     ],
@@ -97,17 +99,33 @@ const features = [
   {
     id: "chat",
     title: "AI Chat",
-    subtitle: "Chat dengan AI assistant",
+    subtitle: "Chat gratis tanpa login",
     description:
-      "Chat dengan AI menggunakan Gemini atau OpenRouter. Butuh login untuk menyimpan riwayat chat. Mendukung multiple sessions.",
+      "Chat dengan AI gratis tanpa perlu akun. 24 model premium — GPT-5.5, Claude Opus 4.8, Gemini 3.1 Pro, Grok 4.1, dan lainnya.",
     icon: "message" as const,
     color: "#7c3aed",
     details: [
-      "Gemini / OpenRouter models",
-      "Chat history tersimpan",
+      "24 model AI premium",
+      "Tanpa login, langsung pakai",
+      "Chat history di browser",
       "Multiple sessions",
       "Markdown formatting",
-      "Gratis tanpa akun",
+    ],
+  },
+  {
+    id: "waifu",
+    title: "AI Waifu",
+    subtitle: "Chat dengan karakter waifu",
+    description:
+      "Roleplay dengan karakter anime favoritmu! Pilih dari preset Hu Tao, Nahida, Ai Hoshino, Zero Two, Marin, Shinobu — atau buat custom.",
+    icon: "heart" as const,
+    color: "#ec4899",
+    details: [
+      "6 preset karakter anime",
+      "Custom character support",
+      "Gratis tanpa login",
+      "Chat history di browser",
+      "Markdown formatting",
     ],
   },
 ];
@@ -118,6 +136,7 @@ const routeMap: Record<string, string> = {
   ttdl: "/ttdl",
   igdl: "/igdl",
   chat: "/chat",
+  waifu: "/ai-waifu",
 };
 
 export default function HomePage() {
@@ -155,6 +174,9 @@ export default function HomePage() {
               <Link href="/chat" className="neo-btn bg-[var(--neo-card-bg)] px-5 py-2.5 font-mono font-medium text-sm flex items-center gap-2" style={{ color: "#7c3aed" }}>
                 <MessageSquare className="size-4" /> AI Chat
               </Link>
+              <Link href="/ai-waifu" className="neo-btn bg-[var(--neo-card-bg)] px-5 py-2.5 font-mono font-medium text-sm flex items-center gap-2" style={{ color: "#ec4899" }}>
+                <Heart className="size-4" /> AI Waifu
+              </Link>
             </div>
           </div>
         </div>
@@ -167,8 +189,8 @@ export default function HomePage() {
             {[
               { icon: <Cloud className="size-5" />, label: "Free CDN", desc: "No cost hosting" },
               { icon: <Zap className="size-5" />, label: "Instant", desc: "Sub-second uploads" },
-              { icon: <Shield className="size-5" />, label: "Secure", desc: "GitHub-backed" },
-              { icon: <Globe className="size-5" />, label: "5 Tools", desc: "All in one app" },
+              { icon: <Shield className="size-5" />, label: "Secure", desc: "Secured Database" },
+              { icon: <Globe className="size-5" />, label: "6 Tools", desc: "All in one app" },
             ].map((stat) => (
               <div key={stat.label} className="neo-card p-4 text-center animate-slide-up">
                 <div className="flex justify-center mb-2 text-orange-500">{stat.icon}</div>
@@ -241,7 +263,7 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-3 gap-4">
             {[
               { step: "01", title: "Upload / Input", desc: "Drag file untuk CDN, masukkan URL, atau chat dengan AI", icon: <MousePointerClick className="size-6" /> },
-              { step: "02", title: "Proses Otomatis", desc: "File ke GitHub, URL ke Gist, media diproses, AI merespons", icon: <Server className="size-6" /> },
+              { step: "02", title: "Proses Otomatis", desc: "File ke Database File, URL ke JSON Database, media diproses, AI merespons", icon: <Server className="size-6" /> },
               { step: "03", title: "Hasil Instan!", desc: "Dapatkan URL, download media, atau baca respons AI", icon: <Globe className="size-6" /> },
             ].map((item) => (
               <div key={item.step} className="neo-card p-5 sm:p-6 text-center">
