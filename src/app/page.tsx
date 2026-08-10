@@ -119,7 +119,7 @@ const features = [
     description:
       "Roleplay dengan karakter anime favoritmu! Pilih dari preset Hu Tao, Nahida, Ai Hoshino, Zero Two, Marin, Shinobu — atau buat custom.",
     icon: "heart" as const,
-    color: "#ec4899",
+    color: "#14b8a6",
     details: [
       "6 preset karakter anime",
       "Custom character support",
@@ -174,7 +174,7 @@ export default function HomePage() {
               <Link href="/chat" className="neo-btn bg-[var(--neo-card-bg)] px-5 py-2.5 font-mono font-medium text-sm flex items-center gap-2" style={{ color: "#7c3aed" }}>
                 <MessageSquare className="size-4" /> AI Chat
               </Link>
-              <Link href="/ai-waifu" className="neo-btn bg-[var(--neo-card-bg)] px-5 py-2.5 font-mono font-medium text-sm flex items-center gap-2" style={{ color: "#ec4899" }}>
+              <Link href="/ai-waifu" className="neo-btn bg-[var(--neo-card-bg)] px-5 py-2.5 font-mono font-medium text-sm flex items-center gap-2" style={{ color: "#14b8a6" }}>
                 <Heart className="size-4" /> AI Waifu
               </Link>
             </div>
