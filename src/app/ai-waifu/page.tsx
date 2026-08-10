@@ -7,8 +7,6 @@ import {
   Loader2,
   Plus,
   Trash2,
-  Sparkles,
-  UserCircle,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
@@ -238,7 +236,7 @@ export default function AiWaifuPage() {
           style={{ borderColor: "var(--neo-border-color)" }}
         >
           <span className="font-mono font-bold text-sm flex items-center gap-1.5">
-            <Heart className="size-4 text-pink-500" /> AI Waifu
+            <Heart className="size-4 text-teal-500" /> AI Waifu
           </span>
           <button
             onClick={handleNewChat}
@@ -271,9 +269,9 @@ export default function AiWaifuPage() {
                 <button
                   key={char.id}
                   onClick={() => handleSelectCharacter(char.id)}
-                  className={`w-full px-3 py-2 font-mono text-xs text-left hover:bg-pink-50 dark:hover:bg-pink-950 transition-colors ${
+                  className={`w-full px-3 py-2 font-mono text-xs text-left hover:bg-teal-50 dark:hover:bg-teal-950 transition-colors ${
                     char.id === selectedCharacter
-                      ? "bg-pink-50 dark:bg-pink-950 font-bold text-pink-600 dark:text-pink-400"
+                      ? "bg-teal-50 dark:bg-teal-950 font-bold text-teal-600 dark:text-teal-400"
                       : ""
                   }`}
                 >
@@ -294,7 +292,7 @@ export default function AiWaifuPage() {
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
               placeholder="Tulis definisi karakter di sini... Contoh: Kamu adalah Rei Ayanami, seorang pilot EVA yang pendiam dan misterius..."
-              className="neo-border rounded-lg w-full px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-pink-300 bg-[var(--neo-card-bg)] resize-none h-24"
+              className="neo-border rounded-lg w-full px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-teal-300 bg-[var(--neo-card-bg)] resize-none h-24"
             />
           </div>
         )}
@@ -328,7 +326,7 @@ export default function AiWaifuPage() {
                   }
                 }}
               >
-                <Heart className="size-3.5 shrink-0" />
+                <Heart className="size-3.5 shrink-0 text-teal-500" />
                 <span className="text-xs font-mono font-medium truncate flex-1">
                   {chat.title}
                 </span>
@@ -366,7 +364,7 @@ export default function AiWaifuPage() {
                   <div
                     className={`max-w-[80%] p-3 rounded-lg text-sm leading-relaxed ${
                       msg.role === "user"
-                        ? "bg-pink-500 text-white font-mono"
+                        ? "bg-[var(--neo-border-color)] text-[var(--neo-card-bg)] font-mono"
                         : "neo-card p-3"
                     }`}
                   >
@@ -401,7 +399,7 @@ export default function AiWaifuPage() {
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={`Chat dengan ${currentChar.name}...`}
                   disabled={sending}
-                  className="neo-border rounded-lg flex-1 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 bg-[var(--neo-card-bg)]"
+                  className="neo-border rounded-lg flex-1 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal-300 bg-[var(--neo-card-bg)]"
                 />
                 <button
                   type="submit"
@@ -409,7 +407,7 @@ export default function AiWaifuPage() {
                   className={`neo-btn px-4 py-2 font-mono font-medium text-sm flex items-center gap-2 shrink-0 ${
                     !input.trim() || sending
                       ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed shadow-none"
-                      : "bg-pink-500 text-white"
+                      : "bg-[var(--neo-border-color)] text-[var(--neo-card-bg)]"
                   }`}
                 >
                   {sending ? (
@@ -426,8 +424,8 @@ export default function AiWaifuPage() {
           <div className="flex-1 flex flex-col">
             <div className="flex-1 flex items-center justify-center p-4">
               <div className="text-center max-w-sm">
-                <div className="inline-flex items-center justify-center neo-border rounded-xl p-4 bg-pink-50 dark:bg-pink-950 mb-4">
-                  <Heart className="size-10 text-pink-500" />
+                <div className="inline-flex items-center justify-center neo-border rounded-xl p-4 bg-teal-50 dark:bg-teal-950 mb-4">
+                  <Heart className="size-10 text-teal-500" />
                 </div>
                 <h2 className="text-xl sm:text-2xl font-mono font-bold mb-2">
                   AI Waifu
@@ -440,20 +438,20 @@ export default function AiWaifuPage() {
                 </p>
                 <div className="neo-card p-4 text-left">
                   <h3 className="font-mono font-bold text-xs mb-2 flex items-center gap-1.5">
-                    <Heart className="size-3 text-pink-500" /> Karakter: {currentChar.emoji} {currentChar.name}
+                    <Heart className="size-3 text-teal-500" /> Karakter: {currentChar.emoji} {currentChar.name}
                   </h3>
                   <ul
                     className="space-y-1 text-xs font-mono"
                     style={{ color: "var(--neo-muted-text)" }}
                   >
                     <li className="flex items-center gap-1.5">
-                      <span className="text-pink-500">•</span> 6 preset karakter
+                      <span className="text-teal-500">•</span> 6 preset karakter
                     </li>
                     <li className="flex items-center gap-1.5">
-                      <span className="text-pink-500">•</span> Custom character support
+                      <span className="text-teal-500">•</span> Custom character support
                     </li>
                     <li className="flex items-center gap-1.5">
-                      <span className="text-pink-500">•</span> Gratis tanpa login
+                      <span className="text-teal-500">•</span> Gratis tanpa login
                     </li>
                   </ul>
                 </div>
@@ -466,7 +464,7 @@ export default function AiWaifuPage() {
                       onClick={() => handleSelectCharacter(char.id)}
                       className={`neo-border rounded-lg p-2 text-center transition-all hover:translate-x-[-1px] hover:translate-y-[-1px] ${
                         char.id === selectedCharacter
-                          ? "bg-pink-50 dark:bg-pink-950 border-pink-500"
+                          ? "bg-teal-50 dark:bg-teal-950 border-teal-500"
                           : "bg-[var(--neo-card-bg)]"
                       }`}
                     >
@@ -507,7 +505,7 @@ export default function AiWaifuPage() {
                     placeholder={`Ketik pesan untuk ${currentChar.name}...`}
                     disabled={sending}
                     autoFocus
-                    className="neo-border rounded-lg flex-1 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 bg-[var(--neo-card-bg)]"
+                    className="neo-border rounded-lg flex-1 px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-teal-300 bg-[var(--neo-card-bg)]"
                   />
                   <button
                     type="submit"
@@ -515,7 +513,7 @@ export default function AiWaifuPage() {
                     className={`neo-btn px-4 py-2 font-mono font-medium text-sm flex items-center gap-2 shrink-0 ${
                       !input.trim() || sending
                         ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed shadow-none"
-                        : "bg-pink-500 text-white"
+                        : "bg-[var(--neo-border-color)] text-[var(--neo-card-bg)]"
                     }`}
                   >
                     {sending ? (
@@ -532,5 +530,4 @@ export default function AiWaifuPage() {
       </div>
     </div>
   );
-                  }
-            
+}
