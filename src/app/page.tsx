@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   UploadCloud,
   Link as LinkIcon,
@@ -38,7 +38,7 @@ const iconMap = {
 };
 
 const features = [
-  {
+  {    
     id: "cdn",
     title: "CDN Hosting",
     subtitle: "Host any file, any mimetype",
@@ -46,13 +46,6 @@ const features = [
       "Upload images, videos, documents, executables — anything. Your files are stored on GitHub and served through your own domain with proper MIME types.",
     icon: "upload-cloud" as const,
     color: "#f97316",
-    details: [
-      "Supports all MIME types",
-      "Drag & drop file upload",
-      "Random 4-char filenames",
-      "GitHub as free storage",
-      "Proxied through your domain",
-    ],
   },
   {
     id: "shorturl",
@@ -62,13 +55,6 @@ const features = [
       "Transform long URLs into short, shareable links. Optionally customize your short codes. All mappings stored in a GitHub Gist — zero cost.",
     icon: "link" as const,
     color: "#10b981",
-    details: [
-      "Custom short codes (optional)",
-      "Random code generation",
-      "GitHub Gist as database",
-      "Instant 302 redirects",
-      "Collision-safe codes",
-    ],
   },
   {
     id: "ttdl",
@@ -78,13 +64,6 @@ const features = [
       "Unduh video TikTok tanpa watermark dalam kualitas HD. Juga mendukung download audio MP3 dan photo slide carousel.",
     icon: "upload-cloud" as const,
     color: "#0d9488",
-    details: [
-      "Video HD tanpa watermark",
-      "Download audio MP3",
-      "Photo slide carousel",
-      "Video dengan watermark",
-      "Info statistik lengkap",
-    ],
   },
   {
     id: "igdl",
@@ -94,13 +73,6 @@ const features = [
       "Unduh Reels, video post, foto single & multiple carousel dari Instagram. Cukup paste URL dan langsung download.",
     icon: "upload-cloud" as const,
     color: "#be123c",
-    details: [
-      "Download Reels video",
-      "Download video post",
-      "Foto single & carousel",
-      "Thumbnail preview",
-      "Per-item download",
-    ],
   },
   {
     id: "fbdl",
@@ -110,13 +82,6 @@ const features = [
       "Unduh video Facebook dengan pilihan kualitas SD atau HD. Cukup paste URL video Facebook dan langsung download.",
     icon: "monitor" as const,
     color: "#2563eb",
-    details: [
-      "Video SD download",
-      "Video HD download",
-      "Gratis tanpa login",
-      "Paste & download",
-      "Fast processing",
-    ],
   },
   {
     id: "chat",
@@ -126,13 +91,6 @@ const features = [
       "Chat dengan AI gratis tanpa perlu akun. 24 model premium — GPT-5.5, Claude Opus 4.8, Gemini 3.1 Pro, Grok 4.1, dan lainnya.",
     icon: "message" as const,
     color: "#7c3aed",
-    details: [
-      "24 model AI premium",
-      "Tanpa login, langsung pakai",
-      "Chat history di browser",
-      "Multiple sessions",
-      "Markdown formatting",
-    ],
   },
   {
     id: "waifu",
@@ -142,13 +100,6 @@ const features = [
       "Roleplay dengan karakter anime favoritmu! Pilih dari preset Hu Tao, Nahida, Ai Hoshino, Zero Two, Marin, Shinobu — atau buat custom.",
     icon: "heart" as const,
     color: "#14b8a6",
-    details: [
-      "6 preset karakter anime",
-      "Custom character support",
-      "Gratis tanpa login",
-      "Chat history di browser",
-      "Markdown formatting",
-    ],
   },
   {
     id: "imagen",
@@ -158,13 +109,6 @@ const features = [
       "Buat gambar dari deskripsi teks menggunakan AI. Cukup ketik prompt dan dapatkan gambar instan. Gratis tanpa login.",
     icon: "image" as const,
     color: "#e11d48",
-    details: [
-      "Text to image AI",
-      "Instant generation",
-      "Gratis tanpa login",
-      "Download hasil",
-      "Unlimited requests",
-    ],
   },
 ];
 
@@ -180,16 +124,85 @@ const routeMap: Record<string, string> = {
 };
 
 export default function HomePage() {
-  const sliderRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [displayIndex, setDisplayIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const touchStartX = useRef(0);
+  const touchDeltaX = useRef(0);
+  const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const total = features.length;
 
-  const scroll = (dir: "left" | "right") => {
-    if (!sliderRef.current) return;
-    const amount = 320;
-    sliderRef.current.scrollBy({
-      left: dir === "left" ? -amount : amount,
-      behavior: "smooth",
-    });
+  // Smooth fade transition when changing slides
+  const goToSlide = useCallback(
+    (index: number) => {
+      if (index === displayIndex || isTransitioning) return;
+      setIsTransitioning(true);
+      // Fade out, then swap content, then fade in
+      setTimeout(() => {
+        setDisplayIndex(index);
+        setActiveIndex(index);
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 50);
+      }, 300);
+    },
+    [displayIndex, isTransitioning]
+  );
+
+  const goNext = useCallback(() => {
+    goToSlide((displayIndex + 1) % total);
+  }, [displayIndex, total, goToSlide]);
+
+  const goPrev = useCallback(() => {
+    goToSlide((displayIndex - 1 + total) % total);
+  }, [displayIndex, total, goToSlide]);
+
+  // Auto-play every 10 seconds
+  useEffect(() => {
+    if (isPaused) {
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+      return;
+    }
+    autoPlayRef.current = setInterval(() => {
+      goNext();
+    }, 10000);
+    return () => {
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+    };
+  }, [isPaused, goNext]);
+
+  // Touch handlers for swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+    setIsPaused(true);
   };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+  };
+
+  const handleTouchEnd = () => {
+    const threshold = 50;
+    if (touchDeltaX.current < -threshold) {
+      goNext();
+    } else if (touchDeltaX.current > threshold) {
+      goPrev();
+    }
+    // Resume auto-play after 5s of no interaction
+    setTimeout(() => setIsPaused(false), 5000);
+  };
+
+  // Pause auto-play on button click, resume after 5s
+  const handleManualNav = (fn: () => void) => {
+    setIsPaused(true);
+    fn();
+    setTimeout(() => setIsPaused(false), 5000);
+  };
+
+  const currentFeature = features[displayIndex];
+  const CurrentIcon = iconMap[currentFeature.icon];
 
   return (
     <div className="flex flex-col">
@@ -212,69 +225,97 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Slider */}
+      {/* Features Carousel */}
       <section className="py-8 sm:py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-xl sm:text-2xl font-mono font-bold mb-1">Fitur Lengkap</h2>
               <p className="font-mono text-xs sm:text-sm" style={{ color: "var(--neo-muted-text)" }}>
-                Geser untuk lihat semua fitur
+                {displayIndex + 1} / {total} — Geser atau klik untuk pindah
               </p>
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() => scroll("left")}
+                onClick={() => handleManualNav(goPrev)}
                 className="neo-btn p-2 bg-[var(--neo-card-bg)] hover:opacity-80"
+                aria-label="Previous"
               >
                 <ChevronLeft className="size-4" />
               </button>
               <button
-                onClick={() => scroll("right")}
+                onClick={() => handleManualNav(goNext)}
                 className="neo-btn p-2 bg-[var(--neo-card-bg)] hover:opacity-80"
+                aria-label="Next"
               >
                 <ChevronRight className="size-4" />
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Horizontal scrollable slider — constrained to content width */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <div
-          ref={sliderRef}
-          className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth"
-          style={{ scrollbarWidth: "thin" }}
-        >
-          {features.map((feature, i) => {
-            const Icon = iconMap[feature.icon];
-            return (
-              <div
-                key={feature.id}
-                className="neo-card p-5 sm:p-6 min-w-[280px] sm:min-w-[300px] max-w-[320px] snap-start shrink-0"
-              >
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="neo-border rounded-lg p-2 shrink-0" style={{ backgroundColor: `${feature.color}15` }}>
-                    <Icon className="size-4" style={{ color: feature.color }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-mono font-bold text-sm mb-0.5">{feature.title}</h3>
-                    <p className="font-mono text-[11px]" style={{ color: "var(--neo-muted-text)" }}>{feature.subtitle}</p>
-                  </div>
-                </div>
-                <p className="text-xs mb-3 leading-relaxed" style={{ color: "var(--neo-muted-text)" }}>{feature.description}</p>
-                <Link
-                  href={routeMap[feature.id] || "/"}
-                  className="neo-btn w-full text-center px-3 py-2 font-mono font-medium text-xs flex items-center justify-center gap-2 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_var(--neo-shadow-color)] transition-all duration-200"
-                  style={{ backgroundColor: `${feature.color}15`, color: feature.color, borderColor: feature.color }}
+          {/* Carousel Card — centered, with fade transition */}
+          <div
+            className="relative"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div
+              className="transition-opacity duration-300 ease-in-out"
+              style={{ opacity: isTransitioning ? 0 : 1 }}
+            >
+              <div className="neo-card p-6 sm:p-8 max-w-md mx-auto text-center">
+                {/* Icon */}
+                <div
+                  className="neo-border rounded-xl p-3 mx-auto mb-4 w-fit"
+                  style={{ backgroundColor: `${currentFeature.color}15` }}
                 >
-                  Buka {feature.title}
-                  <ArrowRight className="size-3" />
+                  <CurrentIcon className="size-6" style={{ color: currentFeature.color }} />
+                </div>
+                {/* Title */}
+                <h3 className="font-mono font-bold text-lg mb-1">{currentFeature.title}</h3>
+                <p className="font-mono text-xs mb-3" style={{ color: "var(--neo-muted-text)" }}>
+                  {currentFeature.subtitle}
+                </p>
+                {/* Description */}
+                <p className="text-sm mb-5 leading-relaxed" style={{ color: "var(--neo-muted-text)" }}>
+                  {currentFeature.description}
+                </p>
+                {/* CTA Button — centered */}
+                <Link
+                  href={routeMap[currentFeature.id] || "/"}
+                  className="neo-btn inline-flex items-center justify-center gap-2 px-5 py-2.5 font-mono font-medium text-sm hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_var(--neo-shadow-color)] transition-all duration-200"
+                  style={{
+                    backgroundColor: `${currentFeature.color}15`,
+                    color: currentFeature.color,
+                    borderColor: currentFeature.color,
+                  }}
+                >
+                  Buka {currentFeature.title}
+                  <ArrowRight className="size-4" />
                 </Link>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          </div>
+
+          {/* Dot Indicators */}
+          <div className="flex justify-center gap-2 mt-5">
+            {features.map((f, i) => (
+              <button
+                key={f.id}
+                onClick={() => handleManualNav(() => goToSlide(i))}
+                className="transition-all duration-300 rounded-full"
+                style={{
+                  width: i === activeIndex ? 24 : 8,
+                  height: 8,
+                  backgroundColor: i === activeIndex ? f.color : "var(--neo-border-color)",
+                  opacity: i === activeIndex ? 1 : 0.3,
+                }}
+                aria-label={`Go to ${f.title}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
