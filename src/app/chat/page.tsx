@@ -9,6 +9,8 @@ import {
   Trash2,
   ChevronDown,
   Sparkles,
+  History,
+  X,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
@@ -43,6 +45,7 @@ export default function ChatPage() {
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [selectedModel, setSelectedModel] = useState("openai/gpt-5.5");
   const [showModelPicker, setShowModelPicker] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -195,10 +198,10 @@ export default function ChatPage() {
 
   // ===================== RENDER =====================
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] flex flex-col sm:flex-row">
-      {/* Sidebar */}
+    <div className="h-screen flex">
+      {/* Sidebar — always on desktop, toggle on mobile */}
       <div
-        className="w-full sm:w-64 border-b-2 sm:border-b-0 sm:border-r-2 flex flex-col shrink-0"
+        className={`sm:flex flex-col shrink-0 sm:w-56 w-64 border-r-2 bg-[var(--neo-card-bg)] ${showMobileSidebar ? "flex fixed inset-y left-0 z-50" : "hidden"} sm:relative sm:z-auto`}
         style={{ borderColor: "var(--neo-border-color)" }}
       >
         <div
@@ -208,6 +211,13 @@ export default function ChatPage() {
           <span className="font-mono font-bold text-sm flex items-center gap-1.5">
             <Sparkles className="size-4 text-orange-500" /> AI Chat
           </span>
+          {/* Mobile close button */}
+          <button
+            onClick={() => setShowMobileSidebar(false)}
+            className="sm:hidden neo-btn p-1.5 bg-[var(--neo-card-bg)]"
+          >
+            <X className="size-4" />
+          </button>
           <button
             onClick={handleNewChat}
             className="neo-btn p-1.5 bg-[var(--neo-card-bg)]"
@@ -301,10 +311,26 @@ export default function ChatPage() {
         </div>
       </div>
 
+      {/* Mobile overlay */}
+      {showMobileSidebar && (
+        <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setShowMobileSidebar(false)} />
+      )}
+
       {/* Chat Area */}
       <div className="flex-1 flex flex-col min-h-0">
         {activeChat ? (
           <>
+            {/* Mobile history toggle */}
+            <div className="sm:hidden flex items-center gap-2 p-2 border-b-2" style={{ borderColor: "var(--neo-border-color)" }}>
+              <button
+                onClick={() => setShowMobileSidebar(true)}
+                className="neo-btn px-3 py-1.5 font-mono text-xs flex items-center gap-1.5 bg-[var(--neo-card-bg)]"
+              >
+                <History className="size-3.5" /> Tampilkan Riwayat
+              </button>
+              <span className="font-mono text-xs" style={{ color: "var(--neo-muted-text)" }}>{chats.length} chat</span>
+            </div>
+
             {/* Messages */}
             <div
               className="flex-1 overflow-y-auto p-4 space-y-4 chat-scroll"
@@ -401,13 +427,13 @@ export default function ChatPage() {
                     style={{ color: "var(--neo-muted-text)" }}
                   >
                     <li className="flex items-center gap-1.5">
-                      <span className="text-orange-500">•</span> 24 Model AI Premium
+                      <span className="text-orange-500">•</span> 24 model AI premium
                     </li>
                     <li className="flex items-center gap-1.5">
-                      <span className="text-orange-500">•</span> Tanpa Login
+                      <span className="text-orange-500">•</span> Tanpa login
                     </li>
                     <li className="flex items-center gap-1.5">
-                      <span className="text-orange-500">•</span> Gratis Selamanya ( Asal Tau Diri )
+                      <span className="text-orange-500">•</span> Gratis via ChatDay
                     </li>
                   </ul>
                 </div>
