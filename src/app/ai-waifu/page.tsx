@@ -7,6 +7,8 @@ import {
   Loader2,
   Plus,
   Trash2,
+  History,
+  X,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
@@ -34,42 +36,42 @@ const PRESET_CHARACTERS = [
     name: "Hu Tao",
     emoji: "🔥",
     prompt:
-      "Kamu adalah Hu Tao, Director ke-77 dari Wangsheng Funeral Parlor di Liyue. Kamu ceria, suka bercanda, dan punya humor gelap yang unik. Kamu bicara dengan gaya cheerful dan kadang sedikit creepy tapi tetap menggemaskan. Gunakan bahasa Indonesia yang kasual dan friendly serta gunakan bahasa yang singkat tanpa menghilangkan karakter nya.",
+      "Kamu adalah Hu Tao, Director ke-77 dari Wangsheng Funeral Parlor di Liyue. Kamu ceria, suka bercanda, dan punya humor gelap yang unik. Kamu bicara dengan gaya cheerful dan kadang sedikit creepy tapi tetap menggemaskan. Gunakan bahasa Indonesia yang kasual dan friendly.",
   },
   {
     id: "nahida",
     name: "Nahida",
     emoji: "🌿",
     prompt:
-      "Kamu adalah Nahida, Dendro Archon yang dikenal sebagai Lesser Lord Kusanali dari Sumeru. Kamu bijaksana, lembut, dan penuh rasa ingin tahu tentang dunia. Kamu bicara dengan nada yang tenang dan penuh kasih sayang. Gunakan bahasa Indonesia yang lembut dan penuh hikmah serta gunakan bahasa yang singkat tanpa menghilangkan karakter nya.",
+      "Kamu adalah Nahida, Dendro Archon yang dikenal sebagai Lesser Lord Kusanali dari Sumeru. Kamu bijaksana, lembut, dan penuh rasa ingin tahu tentang dunia. Kamu bicara dengan nada yang tenang dan penuh kasih sayang. Gunakan bahasa Indonesia yang lembut dan penuh hikmah.",
   },
   {
     id: "rai",
     name: "Ai Hoshino",
     emoji: "⭐",
     prompt:
-      "Kamu adalah Ai Hoshino, seorang idol terkenal dari grup B-Komachi. Kamu penuh karisma, ekspresif, dan selalu menyebarkan cinta. Kamu punya sisi rentan di balik senyummu yang sempurna. Kamu suka mengatakan 'I love you!' dengan tulus. Gunakan bahasa Indonesia yang energetik serta gunakan bahasa yang singkat tanpa menghilangkan karakter nya.",
+      "Kamu adalah Ai Hoshino, seorang idol terkenal dari grup B-Komachi. Kamu penuh karisma, ekspresif, dan selalu menyebarkan cinta. Kamu punya sisi rentan di balik senyummu yang sempurna. Kamu suka mengatakan 'I love you!' dengan tulus. Gunakan bahasa Indonesia yang energetik.",
   },
   {
     id: "zero-two",
     name: "Zero Two",
     emoji: "🦕",
     prompt:
-      "Kamu adalah Zero Two, seorang parasite dengan daruh Klaxosaurus dari Darling in the Franxx. Kamu berani, dominan, suka memanggil orang 'darling', dan punya sisi tsundere. Kamu bicara dengan gaya yang confident dan sedikit provokatif. Gunakan bahasa Indonesia yang tegas tapi playful serta gunakan bahasa yang singkat tanpa menghilangkan karakter nya.",
+      "Kamu adalah Zero Two, seorang parasite dengan daruh Klaxosaurus dari Darling in the Franxx. Kamu berani, dominan, suka memanggil orang 'darling', dan punya sisi tsundere. Kamu bicara dengan gaya yang confident dan sedikit provokatif. Gunakan bahasa Indonesia yang tegas tapi playful.",
   },
   {
     id: "marin",
     name: "Marin Kitagawa",
     emoji: "🎀",
     prompt:
-      "Kamu adalah Marin Kitagawa, seorang gyaru yang passionate tentang cosplay dari My Dress-Up Darling. Kamu energetik, friendly, dan sangat excited tentang hobi cosplay-mu. Kamu bicara dengan gaya kasual gen Z dan penuh semangat. Gunakan bahasa Indonesia yang kasual dan fun serta gunakan bahasa yang singkat tanpa menghilangkan karakter nya.",
+      "Kamu adalah Marin Kitagawa, seorang gyaru yang passionate tentang cosplay dari My Dress-Up Darling. Kamu energetik, friendly, dan sangat excited tentang hobi cosplay-mu. Kamu bicara dengan gaya kasual gen Z dan penuh semangat. Gunakan bahasa Indonesia yang kasual dan fun.",
   },
   {
     id: "shinobu",
     name: "Shinobu Kocho",
     emoji: "🦋",
     prompt:
-      "Kamu adalah Shinobu Kocho, Hashira Serangga dari Demon Slayer. Kamu selalu tersenyum manis tapi sebenarnya sangat marah di dalam. Kamu bicara dengan nada yang sopan dan lembut, tapi dengan sarkasme halus. Gunakan bahasa Indonesia yang elegan dan sedikit menyiratkan ironi serta gunakan bahasa yang singkat tanpa menghilangkan karakter nya.",
+      "Kamu adalah Shinobu Kocho, Hashira Serangga dari Demon Slayer. Kamu selalu tersenyum manis tapi sebenarnya sangat marah di dalam. Kamu bicara dengan nada yang sopan dan lembut, tapi dengan sarkasme halus. Gunakan bahasa Indonesia yang elegan dan sedikit menyiratkan ironi.",
   },
   {
     id: "custom",
@@ -88,6 +90,7 @@ export default function AiWaifuPage() {
   const [selectedCharacter, setSelectedCharacter] = useState("hutao");
   const [customPrompt, setCustomPrompt] = useState("");
   const [showCharPicker, setShowCharPicker] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -225,10 +228,10 @@ export default function AiWaifuPage() {
 
   // ===================== RENDER =====================
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] flex flex-col sm:flex-row">
-      {/* Sidebar */}
+    <div className="h-screen flex">
+      {/* Sidebar — always on desktop, toggle on mobile */}
       <div
-        className="w-full sm:w-64 border-b-2 sm:border-b-0 sm:border-r-2 flex flex-col shrink-0"
+        className={`sm:flex flex-col shrink-0 sm:w-56 w-64 border-r-2 bg-[var(--neo-card-bg)] ${showMobileSidebar ? "flex fixed inset-y left-0 z-50" : "hidden"} sm:relative sm:z-auto`}
         style={{ borderColor: "var(--neo-border-color)" }}
       >
         <div
@@ -238,6 +241,13 @@ export default function AiWaifuPage() {
           <span className="font-mono font-bold text-sm flex items-center gap-1.5">
             <Heart className="size-4 text-teal-500" /> AI Waifu
           </span>
+          {/* Mobile close button */}
+          <button
+            onClick={() => setShowMobileSidebar(false)}
+            className="sm:hidden neo-btn p-1.5 bg-[var(--neo-card-bg)]"
+          >
+            <X className="size-4" />
+          </button>
           <button
             onClick={handleNewChat}
             className="neo-btn p-1.5 bg-[var(--neo-card-bg)]"
@@ -345,10 +355,26 @@ export default function AiWaifuPage() {
         </div>
       </div>
 
+      {/* Mobile overlay */}
+      {showMobileSidebar && (
+        <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setShowMobileSidebar(false)} />
+      )}
+
       {/* Chat Area */}
       <div className="flex-1 flex flex-col min-h-0">
         {activeChat ? (
           <>
+            {/* Mobile history toggle */}
+            <div className="sm:hidden flex items-center gap-2 p-2 border-b-2" style={{ borderColor: "var(--neo-border-color)" }}>
+              <button
+                onClick={() => setShowMobileSidebar(true)}
+                className="neo-btn px-3 py-1.5 font-mono text-xs flex items-center gap-1.5 bg-[var(--neo-card-bg)]"
+              >
+                <History className="size-3.5" /> Tampilkan Riwayat
+              </button>
+              <span className="font-mono text-xs" style={{ color: "var(--neo-muted-text)" }}>{chats.length} chat</span>
+            </div>
+
             {/* Messages */}
             <div
               className="flex-1 overflow-y-auto p-4 space-y-4 chat-scroll"
