@@ -9,6 +9,7 @@ import {
   Trash2,
   History,
   X,
+  ChevronDown,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
@@ -90,7 +91,7 @@ export default function AiWaifuPage() {
   const [selectedCharacter, setSelectedCharacter] = useState("hutao");
   const [customPrompt, setCustomPrompt] = useState("");
   const [showCharPicker, setShowCharPicker] = useState(false);
-  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [showMobileRiwayat, setShowMobileRiwayat] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -169,13 +170,7 @@ export default function AiWaifuPage() {
         setChats((prev) =>
           prev.map((c) =>
             c.id === chatId
-              ? {
-                  ...c,
-                  messages: [
-                    ...c.messages,
-                    { role: "assistant" as const, content: `⚠️ ${data.error}` },
-                  ],
-                }
+              ? { ...c, messages: [...c.messages, { role: "assistant" as const, content: `⚠️ ${data.error}` }] }
               : c
           )
         );
@@ -183,13 +178,7 @@ export default function AiWaifuPage() {
         setChats((prev) =>
           prev.map((c) =>
             c.id === chatId
-              ? {
-                  ...c,
-                  messages: [
-                    ...c.messages,
-                    { role: "assistant" as const, content: data.content },
-                  ],
-                }
+              ? { ...c, messages: [...c.messages, { role: "assistant" as const, content: data.content }] }
               : c
           )
         );
@@ -198,13 +187,7 @@ export default function AiWaifuPage() {
       setChats((prev) =>
         prev.map((c) =>
           c.id === chatId
-            ? {
-                ...c,
-                messages: [
-                  ...c.messages,
-                  { role: "assistant" as const, content: "❌ Gagal menghubungi server." },
-                ],
-              }
+            ? { ...c, messages: [...c.messages, { role: "assistant" as const, content: "❌ Gagal menghubungi server." }] }
             : c
         )
       );
@@ -226,153 +209,163 @@ export default function AiWaifuPage() {
     setShowCharPicker(false);
   };
 
-  // ===================== RENDER =====================
-  return (
-    <div className="h-screen flex">
-      {/* Sidebar — always on desktop, toggle on mobile */}
+  // Shared riwayat content
+  const riwayatContent = (
+    <div className="flex flex-col h-full">
       <div
-        className={`sm:flex flex-col shrink-0 sm:w-56 w-64 border-r-2 bg-[var(--neo-card-bg)] ${showMobileSidebar ? "flex fixed inset-y left-0 z-50" : "hidden"} sm:relative sm:z-auto`}
+        className="p-3 flex items-center justify-between border-b-2"
         style={{ borderColor: "var(--neo-border-color)" }}
       >
-        <div
-          className="p-3 flex items-center justify-between border-b-2"
-          style={{ borderColor: "var(--neo-border-color)" }}
-        >
-          <span className="font-mono font-bold text-sm flex items-center gap-1.5">
-            <Heart className="size-4 text-teal-500" /> AI Waifu
-          </span>
-          {/* Mobile close button */}
+        <span className="font-mono font-bold text-sm flex items-center gap-1.5">
+          <Heart className="size-4 text-teal-500" /> Riwayat
+        </span>
+        <div className="flex gap-1.5">
           <button
-            onClick={() => setShowMobileSidebar(false)}
-            className="sm:hidden neo-btn p-1.5 bg-[var(--neo-card-bg)]"
-          >
-            <X className="size-4" />
-          </button>
-          <button
-            onClick={handleNewChat}
+            onClick={() => { handleNewChat(); setShowMobileRiwayat(false); }}
             className="neo-btn p-1.5 bg-[var(--neo-card-bg)]"
             title="New chat"
           >
             <Plus className="size-4" />
           </button>
-        </div>
-
-        {/* Character Picker */}
-        <div
-          className="p-2 border-b-2"
-          style={{ borderColor: "var(--neo-border-color)" }}
-        >
           <button
-            onClick={() => setShowCharPicker(!showCharPicker)}
-            className="neo-btn w-full px-3 py-1.5 font-mono text-xs flex items-center justify-between gap-1 bg-[var(--neo-card-bg)]"
+            onClick={() => setShowMobileRiwayat(false)}
+            className="sm:hidden neo-btn p-1.5 bg-[var(--neo-card-bg)]"
           >
-            <span className="truncate flex items-center gap-1.5">
-              <span>{currentChar.emoji}</span> {currentChar.name}
-            </span>
+            <X className="size-4" />
           </button>
-          {showCharPicker && (
-            <div
-              className="mt-1 neo-border rounded-md bg-[var(--neo-card-bg)] overflow-hidden"
-              style={{ boxShadow: "3px 3px 0px var(--neo-shadow-color)" }}
-            >
-              {PRESET_CHARACTERS.map((char) => (
-                <button
-                  key={char.id}
-                  onClick={() => handleSelectCharacter(char.id)}
-                  className={`w-full px-3 py-2 font-mono text-xs text-left hover:bg-teal-50 dark:hover:bg-teal-950 transition-colors ${
-                    char.id === selectedCharacter
-                      ? "bg-teal-50 dark:bg-teal-950 font-bold text-teal-600 dark:text-teal-400"
-                      : ""
-                  }`}
-                >
-                  {char.emoji} {char.name}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Custom character prompt */}
-        {selectedCharacter === "custom" && (
-          <div
-            className="p-2 border-b-2"
-            style={{ borderColor: "var(--neo-border-color)" }}
-          >
-            <textarea
-              value={customPrompt}
-              onChange={(e) => setCustomPrompt(e.target.value)}
-              placeholder="Tulis definisi karakter di sini... Contoh: Kamu adalah Rei Ayanami, seorang pilot EVA yang pendiam dan misterius..."
-              className="neo-border rounded-lg w-full px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-teal-300 bg-[var(--neo-card-bg)] resize-none h-24"
-            />
-          </div>
-        )}
-
-        {/* Chat list */}
-        <div
-          className="flex-1 overflow-y-auto p-2 space-y-1"
-          style={{ maxHeight: "calc(100vh - 14rem)" }}
-        >
-          {chats.length === 0 ? (
-            <p
-              className="text-xs font-mono text-center py-4"
-              style={{ color: "var(--neo-muted-text)" }}
-            >
-              Belum ada chat
-            </p>
-          ) : (
-            chats.map((chat) => (
-              <div
-                key={chat.id}
-                className={`flex items-center gap-2 p-2 rounded-md cursor-pointer group ${
-                  activeId === chat.id
-                    ? "bg-[var(--neo-border-color)] text-[var(--neo-card-bg)]"
-                    : "hover:opacity-80"
-                }`}
-                onClick={() => {
-                  setActiveId(chat.id);
-                  if (chat.character) {
-                    setSelectedCharacter(chat.character);
-                    localStorage.setItem(CHARACTER_KEY, chat.character);
-                  }
-                }}
-              >
-                <Heart className="size-3.5 shrink-0 text-teal-500" />
-                <span className="text-xs font-mono font-medium truncate flex-1">
-                  {chat.title}
-                </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteChat(chat.id);
-                  }}
-                  className="opacity-0 group-hover:opacity-100 shrink-0"
-                >
-                  <Trash2 className="size-3" />
-                </button>
-              </div>
-            ))
-          )}
         </div>
       </div>
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        {chats.length === 0 ? (
+          <p className="text-xs font-mono text-center py-4" style={{ color: "var(--neo-muted-text)" }}>
+            Belum ada chat
+          </p>
+        ) : (
+          chats.map((chat) => (
+            <div
+              key={chat.id}
+              className={`flex items-center gap-2 p-2 rounded-md cursor-pointer group ${
+                activeId === chat.id
+                  ? "bg-[var(--neo-border-color)] text-[var(--neo-card-bg)]"
+                  : "hover:opacity-80"
+              }`}
+              onClick={() => {
+                setActiveId(chat.id);
+                if (chat.character) {
+                  setSelectedCharacter(chat.character);
+                  localStorage.setItem(CHARACTER_KEY, chat.character);
+                }
+                setShowMobileRiwayat(false);
+              }}
+            >
+              <Heart className="size-3.5 shrink-0 text-teal-500" />
+              <span className="text-xs font-mono font-medium truncate flex-1">{chat.title}</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleDeleteChat(chat.id); }}
+                className="opacity-0 group-hover:opacity-100 shrink-0"
+              >
+                <Trash2 className="size-3" />
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
 
-      {/* Mobile overlay */}
-      {showMobileSidebar && (
-        <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setShowMobileSidebar(false)} />
+  // Character picker component (used above input)
+  const charPickerAboveInput = (
+    <div className="px-3 pt-2 pb-0 space-y-2">
+      {/* Character selector */}
+      <div className="relative">
+        <button
+          onClick={() => setShowCharPicker(!showCharPicker)}
+          className="neo-btn w-full px-3 py-1.5 font-mono text-xs flex items-center justify-between gap-1 bg-[var(--neo-card-bg)]"
+        >
+          <span className="flex items-center gap-1.5 truncate">
+            <Heart className="size-3 text-teal-500" />
+            {currentChar.emoji} {currentChar.name}
+          </span>
+          <ChevronDown className="size-3 shrink-0" />
+        </button>
+        {showCharPicker && (
+          <div
+            className="absolute bottom-full left-0 right-0 z-10 mb-1 neo-border rounded-md bg-[var(--neo-card-bg)] overflow-hidden"
+            style={{ boxShadow: "3px 3px 0px var(--neo-shadow-color)" }}
+          >
+            {PRESET_CHARACTERS.map((char) => (
+              <button
+                key={char.id}
+                onClick={() => handleSelectCharacter(char.id)}
+                className={`w-full px-3 py-2 font-mono text-xs text-left hover:bg-teal-50 dark:hover:bg-teal-950 transition-colors ${
+                  char.id === selectedCharacter
+                    ? "bg-teal-50 dark:bg-teal-950 font-bold text-teal-600 dark:text-teal-400"
+                    : ""
+                }`}
+              >
+                {char.emoji} {char.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      {/* Custom character prompt (if custom selected) */}
+      {selectedCharacter === "custom" && (
+        <textarea
+          value={customPrompt}
+          onChange={(e) => setCustomPrompt(e.target.value)}
+          placeholder="Tulis definisi karakter... Contoh: Kamu adalah Rei Ayanami, pilot EVA yang pendiam..."
+          className="neo-border rounded-lg w-full px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-teal-300 bg-[var(--neo-card-bg)] resize-none h-20"
+        />
+      )}
+    </div>
+  );
+
+  // ===================== RENDER =====================
+  return (
+    <div className="h-screen flex">
+      {/* Desktop sidebar — riwayat */}
+      <div
+        className="hidden sm:flex flex-col shrink-0 w-56 border-r-2 bg-[var(--neo-card-bg)]"
+        style={{ borderColor: "var(--neo-border-color)" }}
+      >
+        {riwayatContent}
+      </div>
+
+      {/* Mobile right sidebar — riwayat */}
+      {showMobileRiwayat && (
+        <>
+          <div
+            className="sm:hidden fixed inset-0 bg-black/30 z-40"
+            onClick={() => setShowMobileRiwayat(false)}
+          />
+          <div
+            className="sm:hidden fixed top-0 right-0 bottom-0 w-72 z-50 border-l-2 bg-[var(--neo-card-bg)] animate-slide-left"
+            style={{ borderColor: "var(--neo-border-color)" }}
+          >
+            {riwayatContent}
+          </div>
+        </>
       )}
 
       {/* Chat Area */}
       <div className="flex-1 flex flex-col min-h-0">
         {activeChat ? (
           <>
-            {/* Mobile history toggle */}
-            <div className="sm:hidden flex items-center gap-2 p-2 border-b-2" style={{ borderColor: "var(--neo-border-color)" }}>
+            {/* Mobile: riwayat toggle */}
+            <div
+              className="sm:hidden flex items-center justify-between p-2 border-b-2"
+              style={{ borderColor: "var(--neo-border-color)" }}
+            >
+              <span className="font-mono text-xs flex items-center gap-1.5" style={{ color: "var(--neo-muted-text)" }}>
+                <Heart className="size-3 text-teal-500" /> {currentChar.emoji} {currentChar.name}
+              </span>
               <button
-                onClick={() => setShowMobileSidebar(true)}
+                onClick={() => setShowMobileRiwayat(true)}
                 className="neo-btn px-3 py-1.5 font-mono text-xs flex items-center gap-1.5 bg-[var(--neo-card-bg)]"
               >
-                <History className="size-3.5" /> Tampilkan Riwayat
+                <History className="size-3.5" /> Riwayat ({chats.length})
               </button>
-              <span className="font-mono text-xs" style={{ color: "var(--neo-muted-text)" }}>{chats.length} chat</span>
             </div>
 
             {/* Messages */}
@@ -383,9 +376,7 @@ export default function AiWaifuPage() {
               {activeChat.messages.map((msg, i) => (
                 <div
                   key={i}
-                  className={`flex ${
-                    msg.role === "user" ? "justify-end" : "justify-start"
-                  } animate-fade-in-up`}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in-up`}
                 >
                   <div
                     className={`max-w-[80%] p-3 rounded-lg text-sm leading-relaxed ${
@@ -407,16 +398,13 @@ export default function AiWaifuPage() {
               <div ref={chatEndRef} />
             </div>
 
+            {/* Character picker above input */}
+            {charPickerAboveInput}
+
             {/* Input */}
-            <div
-              className="p-3 border-t-2"
-              style={{ borderColor: "var(--neo-border-color)" }}
-            >
+            <div className="p-3 border-t-2" style={{ borderColor: "var(--neo-border-color)" }}>
               <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSend();
-                }}
+                onSubmit={(e) => { e.preventDefault(); handleSend(); }}
                 className="flex gap-2"
               >
                 <input
@@ -436,11 +424,7 @@ export default function AiWaifuPage() {
                       : "bg-[var(--neo-border-color)] text-[var(--neo-card-bg)]"
                   }`}
                 >
-                  {sending ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Send className="size-4" />
-                  )}
+                  {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
                 </button>
               </form>
             </div>
@@ -453,37 +437,12 @@ export default function AiWaifuPage() {
                 <div className="inline-flex items-center justify-center neo-border rounded-xl p-4 bg-teal-50 dark:bg-teal-950 mb-4">
                   <Heart className="size-10 text-teal-500" />
                 </div>
-                <h2 className="text-xl sm:text-2xl font-mono font-bold mb-2">
-                  AI Waifu
-                </h2>
-                <p
-                  className="font-mono text-sm mb-4"
-                  style={{ color: "var(--neo-muted-text)" }}
-                >
+                <h2 className="text-xl sm:text-2xl font-mono font-bold mb-2">AI Waifu</h2>
+                <p className="font-mono text-sm mb-4" style={{ color: "var(--neo-muted-text)" }}>
                   Chat dengan karakter waifu favoritmu. Pilih karakter atau buat custom.
                 </p>
-                <div className="neo-card p-4 text-left">
-                  <h3 className="font-mono font-bold text-xs mb-2 flex items-center gap-1.5">
-                    <Heart className="size-3 text-teal-500" /> Karakter: {currentChar.emoji} {currentChar.name}
-                  </h3>
-                  <ul
-                    className="space-y-1 text-xs font-mono"
-                    style={{ color: "var(--neo-muted-text)" }}
-                  >
-                    <li className="flex items-center gap-1.5">
-                      <span className="text-teal-500">•</span> 6 preset karakter
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <span className="text-teal-500">•</span> Custom character support
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <span className="text-teal-500">•</span> Gratis tanpa login
-                    </li>
-                  </ul>
-                </div>
-
                 {/* Character cards grid */}
-                <div className="grid grid-cols-3 gap-2 mt-4">
+                <div className="grid grid-cols-3 gap-2 mt-2">
                   {PRESET_CHARACTERS.filter((c) => c.id !== "custom").map((char) => (
                     <button
                       key={char.id}
@@ -499,29 +458,28 @@ export default function AiWaifuPage() {
                     </button>
                   ))}
                 </div>
+                {/* Mobile riwayat button on welcome */}
+                <button
+                  onClick={() => setShowMobileRiwayat(true)}
+                  className="sm:hidden neo-btn mt-4 px-4 py-2 font-mono text-xs flex items-center gap-1.5 mx-auto bg-[var(--neo-card-bg)]"
+                >
+                  <History className="size-3.5" /> Lihat Riwayat ({chats.length})
+                </button>
               </div>
             </div>
 
-            {/* Input at bottom of welcome screen */}
-            {selectedCharacter === "custom" && !customPrompt.trim() ? (
-              <div
-                className="p-3 border-t-2"
-                style={{ borderColor: "var(--neo-border-color)" }}
-              >
+            {/* Character picker above input */}
+            {charPickerAboveInput}
+
+            {/* Input at bottom */}
+            <div className="p-3 border-t-2" style={{ borderColor: "var(--neo-border-color)" }}>
+              {selectedCharacter === "custom" && !customPrompt.trim() ? (
                 <p className="text-xs font-mono text-center" style={{ color: "var(--neo-muted-text)" }}>
-                  ✨ Tulis definisi karakter di sidebar dulu, lalu chat di sini
+                  ✨ Tulis definisi karakter di atas, lalu chat di sini
                 </p>
-              </div>
-            ) : (
-              <div
-                className="p-3 border-t-2"
-                style={{ borderColor: "var(--neo-border-color)" }}
-              >
+              ) : (
                 <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSend();
-                  }}
+                  onSubmit={(e) => { e.preventDefault(); handleSend(); }}
                   className="flex gap-2"
                 >
                   <input
@@ -542,15 +500,11 @@ export default function AiWaifuPage() {
                         : "bg-[var(--neo-border-color)] text-[var(--neo-card-bg)]"
                     }`}
                   >
-                    {sending ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Send className="size-4" />
-                    )}
+                    {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
                   </button>
                 </form>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </div>
