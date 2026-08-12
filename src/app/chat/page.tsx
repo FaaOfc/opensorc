@@ -45,7 +45,7 @@ export default function ChatPage() {
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [selectedModel, setSelectedModel] = useState("openai/gpt-5.5");
   const [showModelPicker, setShowModelPicker] = useState(false);
-  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [showMobileRiwayat, setShowMobileRiwayat] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -93,12 +93,10 @@ export default function ChatPage() {
     setInput("");
     setSending(true);
 
-    // Add user message
     let chatId = activeId;
     let updatedChats = [...chats];
 
     if (!chatId) {
-      // Create new chat
       const newChat: LocalChat = {
         id: Date.now().toString(),
         title: msg.slice(0, 40),
@@ -119,7 +117,6 @@ export default function ChatPage() {
     setChats(updatedChats);
     setActiveId(chatId);
 
-    // Get messages for API
     const chatForApi = updatedChats.find((c) => c.id === chatId);
     const apiMessages = (chatForApi?.messages || []).map((m) => ({
       role: m.role,
@@ -139,13 +136,7 @@ export default function ChatPage() {
         setChats((prev) =>
           prev.map((c) =>
             c.id === chatId
-              ? {
-                  ...c,
-                  messages: [
-                    ...c.messages,
-                    { role: "assistant" as const, content: `⚠️ ${data.error}` },
-                  ],
-                }
+              ? { ...c, messages: [...c.messages, { role: "assistant" as const, content: `⚠️ ${data.error}` }] }
               : c
           )
         );
@@ -153,13 +144,7 @@ export default function ChatPage() {
         setChats((prev) =>
           prev.map((c) =>
             c.id === chatId
-              ? {
-                  ...c,
-                  messages: [
-                    ...c.messages,
-                    { role: "assistant" as const, content: data.content },
-                  ],
-                }
+              ? { ...c, messages: [...c.messages, { role: "assistant" as const, content: data.content }] }
               : c
           )
         );
@@ -168,13 +153,7 @@ export default function ChatPage() {
       setChats((prev) =>
         prev.map((c) =>
           c.id === chatId
-            ? {
-                ...c,
-                messages: [
-                  ...c.messages,
-                  { role: "assistant" as const, content: "❌ Gagal menghubungi server." },
-                ],
-              }
+            ? { ...c, messages: [...c.messages, { role: "assistant" as const, content: "❌ Gagal menghubungi server." }] }
             : c
         )
       );
@@ -196,139 +175,116 @@ export default function ChatPage() {
     setShowModelPicker(false);
   };
 
-  // ===================== RENDER =====================
-  return (
-    <div className="h-screen flex">
-      {/* Sidebar — always on desktop, toggle on mobile */}
+  // Shared riwayat content
+  const riwayatContent = (
+    <div className="flex flex-col h-full">
       <div
-        className={`sm:flex flex-col shrink-0 sm:w-56 w-64 border-r-2 bg-[var(--neo-card-bg)] ${showMobileSidebar ? "flex fixed inset-y left-0 z-50" : "hidden"} sm:relative sm:z-auto`}
+        className="p-3 flex items-center justify-between border-b-2"
         style={{ borderColor: "var(--neo-border-color)" }}
       >
-        <div
-          className="p-3 flex items-center justify-between border-b-2"
-          style={{ borderColor: "var(--neo-border-color)" }}
-        >
-          <span className="font-mono font-bold text-sm flex items-center gap-1.5">
-            <Sparkles className="size-4 text-orange-500" /> AI Chat
-          </span>
-          {/* Mobile close button */}
+        <span className="font-mono font-bold text-sm flex items-center gap-1.5">
+          <Sparkles className="size-4 text-orange-500" /> Riwayat
+        </span>
+        <div className="flex gap-1.5">
           <button
-            onClick={() => setShowMobileSidebar(false)}
-            className="sm:hidden neo-btn p-1.5 bg-[var(--neo-card-bg)]"
-          >
-            <X className="size-4" />
-          </button>
-          <button
-            onClick={handleNewChat}
+            onClick={() => { handleNewChat(); setShowMobileRiwayat(false); }}
             className="neo-btn p-1.5 bg-[var(--neo-card-bg)]"
             title="New chat"
           >
             <Plus className="size-4" />
           </button>
-        </div>
-
-        {/* Model Picker */}
-        <div
-          className="p-2 border-b-2"
-          style={{ borderColor: "var(--neo-border-color)" }}
-        >
-          <div className="relative">
-            <button
-              onClick={() => setShowModelPicker(!showModelPicker)}
-              className="neo-btn w-full px-3 py-1.5 font-mono text-xs flex items-center justify-between gap-1 bg-[var(--neo-card-bg)]"
-            >
-              <span className="truncate">{modelName}</span>
-              <ChevronDown className="size-3 shrink-0" />
-            </button>
-            {showModelPicker && (
-              <div
-                className="absolute top-full left-0 right-0 z-10 mt-1 neo-border rounded-md bg-[var(--neo-card-bg)] overflow-hidden"
-                style={{ boxShadow: "3px 3px 0px var(--neo-shadow-color)" }}
-              >
-                {models.map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => handleSelectModel(m.id)}
-                    className={`w-full px-3 py-2 font-mono text-xs text-left hover:bg-orange-50 dark:hover:bg-orange-950 transition-colors ${
-                      m.id === selectedModel
-                        ? "bg-orange-50 dark:bg-orange-950 font-bold text-orange-600 dark:text-orange-400"
-                        : ""
-                    }`}
-                  >
-                    {m.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Chat list */}
-        <div
-          className="flex-1 overflow-y-auto p-2 space-y-1"
-          style={{ maxHeight: "calc(100vh - 12rem)" }}
-        >
-          {chats.length === 0 ? (
-            <p
-              className="text-xs font-mono text-center py-4"
-              style={{ color: "var(--neo-muted-text)" }}
-            >
-              Belum ada chat
-            </p>
-          ) : (
-            chats.map((chat) => (
-              <div
-                key={chat.id}
-                className={`flex items-center gap-2 p-2 rounded-md cursor-pointer group ${
-                  activeId === chat.id
-                    ? "bg-[var(--neo-border-color)] text-[var(--neo-card-bg)]"
-                    : "hover:opacity-80"
-                }`}
-                onClick={() => {
-                  setActiveId(chat.id);
-                  if (chat.model) {
-                    setSelectedModel(chat.model);
-                    localStorage.setItem(MODEL_KEY, chat.model);
-                  }
-                }}
-              >
-                <MessageSquare className="size-3.5 shrink-0" />
-                <span className="text-xs font-mono font-medium truncate flex-1">
-                  {chat.title}
-                </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteChat(chat.id);
-                  }}
-                  className="opacity-0 group-hover:opacity-100 shrink-0"
-                >
-                  <Trash2 className="size-3" />
-                </button>
-              </div>
-            ))
-          )}
+          {/* Mobile close button */}
+          <button
+            onClick={() => setShowMobileRiwayat(false)}
+            className="sm:hidden neo-btn p-1.5 bg-[var(--neo-card-bg)]"
+          >
+            <X className="size-4" />
+          </button>
         </div>
       </div>
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        {chats.length === 0 ? (
+          <p className="text-xs font-mono text-center py-4" style={{ color: "var(--neo-muted-text)" }}>
+            Belum ada chat
+          </p>
+        ) : (
+          chats.map((chat) => (
+            <div
+              key={chat.id}
+              className={`flex items-center gap-2 p-2 rounded-md cursor-pointer group ${
+                activeId === chat.id
+                  ? "bg-[var(--neo-border-color)] text-[var(--neo-card-bg)]"
+                  : "hover:opacity-80"
+              }`}
+              onClick={() => {
+                setActiveId(chat.id);
+                if (chat.model) {
+                  setSelectedModel(chat.model);
+                  localStorage.setItem(MODEL_KEY, chat.model);
+                }
+                setShowMobileRiwayat(false);
+              }}
+            >
+              <MessageSquare className="size-3.5 shrink-0" />
+              <span className="text-xs font-mono font-medium truncate flex-1">{chat.title}</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleDeleteChat(chat.id); }}
+                className="opacity-0 group-hover:opacity-100 shrink-0"
+              >
+                <Trash2 className="size-3" />
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
 
-      {/* Mobile overlay */}
-      {showMobileSidebar && (
-        <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setShowMobileSidebar(false)} />
+  // ===================== RENDER =====================
+  return (
+    <div className="h-screen flex">
+      {/* Desktop sidebar — riwayat */}
+      <div
+        className="hidden sm:flex flex-col shrink-0 w-56 border-r-2 bg-[var(--neo-card-bg)]"
+        style={{ borderColor: "var(--neo-border-color)" }}
+      >
+        {riwayatContent}
+      </div>
+
+      {/* Mobile right sidebar — riwayat */}
+      {showMobileRiwayat && (
+        <>
+          <div
+            className="sm:hidden fixed inset-0 bg-black/30 z-40"
+            onClick={() => setShowMobileRiwayat(false)}
+          />
+          <div
+            className="sm:hidden fixed top-0 right-0 bottom-0 w-72 z-50 border-l-2 bg-[var(--neo-card-bg)] animate-slide-left"
+            style={{ borderColor: "var(--neo-border-color)" }}
+          >
+            {riwayatContent}
+          </div>
+        </>
       )}
 
       {/* Chat Area */}
       <div className="flex-1 flex flex-col min-h-0">
         {activeChat ? (
           <>
-            {/* Mobile history toggle */}
-            <div className="sm:hidden flex items-center gap-2 p-2 border-b-2" style={{ borderColor: "var(--neo-border-color)" }}>
+            {/* Mobile: riwayat toggle + model info */}
+            <div
+              className="sm:hidden flex items-center justify-between p-2 border-b-2"
+              style={{ borderColor: "var(--neo-border-color)" }}
+            >
+              <span className="font-mono text-xs flex items-center gap-1.5" style={{ color: "var(--neo-muted-text)" }}>
+                <Sparkles className="size-3 text-orange-500" /> {modelName}
+              </span>
               <button
-                onClick={() => setShowMobileSidebar(true)}
+                onClick={() => setShowMobileRiwayat(true)}
                 className="neo-btn px-3 py-1.5 font-mono text-xs flex items-center gap-1.5 bg-[var(--neo-card-bg)]"
               >
-                <History className="size-3.5" /> Tampilkan Riwayat
+                <History className="size-3.5" /> Riwayat ({chats.length})
               </button>
-              <span className="font-mono text-xs" style={{ color: "var(--neo-muted-text)" }}>{chats.length} chat</span>
             </div>
 
             {/* Messages */}
@@ -339,9 +295,7 @@ export default function ChatPage() {
               {activeChat.messages.map((msg, i) => (
                 <div
                   key={i}
-                  className={`flex ${
-                    msg.role === "user" ? "justify-end" : "justify-start"
-                  } animate-fade-in-up`}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in-up`}
                 >
                   <div
                     className={`max-w-[80%] p-3 rounded-lg text-sm leading-relaxed ${
@@ -363,16 +317,51 @@ export default function ChatPage() {
               <div ref={chatEndRef} />
             </div>
 
+            {/* Model Picker above input */}
+            <div
+              className="px-3 pt-2 pb-0"
+            >
+              <div className="relative">
+                <button
+                  onClick={() => setShowModelPicker(!showModelPicker)}
+                  className="neo-btn w-full px-3 py-1.5 font-mono text-xs flex items-center justify-between gap-1 bg-[var(--neo-card-bg)]"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="size-3 text-orange-500" />
+                    <span className="truncate">{modelName}</span>
+                  </span>
+                  <ChevronDown className="size-3 shrink-0" />
+                </button>
+                {showModelPicker && (
+                  <div
+                    className="absolute bottom-full left-0 right-0 z-10 mb-1 neo-border rounded-md bg-[var(--neo-card-bg)] overflow-hidden max-h-60 overflow-y-auto"
+                    style={{ boxShadow: "3px 3px 0px var(--neo-shadow-color)" }}
+                  >
+                    {models.map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => handleSelectModel(m.id)}
+                        className={`w-full px-3 py-2 font-mono text-xs text-left hover:bg-orange-50 dark:hover:bg-orange-950 transition-colors ${
+                          m.id === selectedModel
+                            ? "bg-orange-50 dark:bg-orange-950 font-bold text-orange-600 dark:text-orange-400"
+                            : ""
+                        }`}
+                      >
+                        {m.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Input */}
             <div
               className="p-3 border-t-2"
               style={{ borderColor: "var(--neo-border-color)" }}
             >
               <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSend();
-                }}
+                onSubmit={(e) => { e.preventDefault(); handleSend(); }}
                 className="flex gap-2"
               >
                 <input
@@ -392,11 +381,7 @@ export default function ChatPage() {
                       : "bg-[var(--neo-border-color)] text-[var(--neo-card-bg)]"
                   }`}
                 >
-                  {sending ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Send className="size-4" />
-                  )}
+                  {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
                 </button>
               </form>
             </div>
@@ -409,47 +394,70 @@ export default function ChatPage() {
                 <div className="inline-flex items-center justify-center neo-border rounded-xl p-4 bg-orange-50 dark:bg-orange-950 mb-4">
                   <Sparkles className="size-10 text-orange-500" />
                 </div>
-                <h2 className="text-xl sm:text-2xl font-mono font-bold mb-2">
-                  AI Chat
-                </h2>
-                <p
-                  className="font-mono text-sm mb-4"
-                  style={{ color: "var(--neo-muted-text)" }}
-                >
+                <h2 className="text-xl sm:text-2xl font-mono font-bold mb-2">AI Chat</h2>
+                <p className="font-mono text-sm mb-4" style={{ color: "var(--neo-muted-text)" }}>
                   Chat gratis tanpa login. Ketik pesan di bawah untuk mulai.
                 </p>
                 <div className="neo-card p-4 text-left">
                   <h3 className="font-mono font-bold text-xs mb-2 flex items-center gap-1.5">
                     <Sparkles className="size-3 text-orange-500" /> Model: {modelName}
                   </h3>
-                  <ul
-                    className="space-y-1 text-xs font-mono"
-                    style={{ color: "var(--neo-muted-text)" }}
-                  >
-                    <li className="flex items-center gap-1.5">
-                      <span className="text-orange-500">•</span> 24 model AI premium
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <span className="text-orange-500">•</span> Tanpa login
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <span className="text-orange-500">•</span> Gratis via ChatDay
-                    </li>
+                  <ul className="space-y-1 text-xs font-mono" style={{ color: "var(--neo-muted-text)" }}>
+                    <li className="flex items-center gap-1.5"><span className="text-orange-500">•</span> 24 model AI premium</li>
+                    <li className="flex items-center gap-1.5"><span className="text-orange-500">•</span> Tanpa login</li>
+                    <li className="flex items-center gap-1.5"><span className="text-orange-500">•</span> Gratis via ChatDay</li>
                   </ul>
                 </div>
+                {/* Mobile riwayat button on welcome */}
+                <button
+                  onClick={() => setShowMobileRiwayat(true)}
+                  className="sm:hidden neo-btn mt-4 px-4 py-2 font-mono text-xs flex items-center gap-1.5 mx-auto bg-[var(--neo-card-bg)]"
+                >
+                  <History className="size-3.5" /> Lihat Riwayat ({chats.length})
+                </button>
               </div>
             </div>
 
-            {/* Input at bottom of welcome screen */}
-            <div
-              className="p-3 border-t-2"
-              style={{ borderColor: "var(--neo-border-color)" }}
-            >
+            {/* Model Picker above input */}
+            <div className="px-3 pt-2 pb-0">
+              <div className="relative">
+                <button
+                  onClick={() => setShowModelPicker(!showModelPicker)}
+                  className="neo-btn w-full px-3 py-1.5 font-mono text-xs flex items-center justify-between gap-1 bg-[var(--neo-card-bg)]"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="size-3 text-orange-500" />
+                    <span className="truncate">{modelName}</span>
+                  </span>
+                  <ChevronDown className="size-3 shrink-0" />
+                </button>
+                {showModelPicker && (
+                  <div
+                    className="absolute bottom-full left-0 right-0 z-10 mb-1 neo-border rounded-md bg-[var(--neo-card-bg)] overflow-hidden max-h-60 overflow-y-auto"
+                    style={{ boxShadow: "3px 3px 0px var(--neo-shadow-color)" }}
+                  >
+                    {models.map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => handleSelectModel(m.id)}
+                        className={`w-full px-3 py-2 font-mono text-xs text-left hover:bg-orange-50 dark:hover:bg-orange-950 transition-colors ${
+                          m.id === selectedModel
+                            ? "bg-orange-50 dark:bg-orange-950 font-bold text-orange-600 dark:text-orange-400"
+                            : ""
+                        }`}
+                      >
+                        {m.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Input at bottom */}
+            <div className="p-3 border-t-2" style={{ borderColor: "var(--neo-border-color)" }}>
               <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSend();
-                }}
+                onSubmit={(e) => { e.preventDefault(); handleSend(); }}
                 className="flex gap-2"
               >
                 <input
@@ -470,11 +478,7 @@ export default function ChatPage() {
                       : "bg-[var(--neo-border-color)] text-[var(--neo-card-bg)]"
                   }`}
                 >
-                  {sending ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Send className="size-4" />
-                  )}
+                  {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
                 </button>
               </form>
             </div>
