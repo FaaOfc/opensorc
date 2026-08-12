@@ -239,10 +239,11 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Horizontal scrollable slider */}
+        {/* Horizontal scrollable slider — constrained to content width */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div
           ref={sliderRef}
-          className="flex gap-4 overflow-x-auto pb-4 px-4 sm:px-6 snap-x snap-mandatory scroll-smooth"
+          className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth"
           style={{ scrollbarWidth: "thin" }}
         >
           {features.map((feature, i) => {
@@ -273,6 +274,7 @@ export default function HomePage() {
               </div>
             );
           })}
+        </div>
         </div>
       </section>
 
