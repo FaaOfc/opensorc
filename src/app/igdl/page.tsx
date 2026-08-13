@@ -12,6 +12,56 @@ import {
   Layers,
 } from "lucide-react";
 
+// Direct image download with custom filename
+async function downloadImage(url: string, platform: string, index: number) {
+  const shortId = Math.random().toString(36).slice(2, 7);
+  const filename = `taosite_${platform}_photo_${index}_${shortId}.jpg`;
+
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+  } catch {
+    try {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject();
+        img.src = url;
+      });
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      canvas.getContext("2d")!.drawImage(img, 0, 0);
+      canvas.toBlob(
+        (b) => {
+          if (!b) return;
+          const blobUrl = URL.createObjectURL(b);
+          const a = document.createElement("a");
+          a.href = blobUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        },
+        "image/jpeg",
+        0.95
+      );
+    } catch {
+      window.open(url, "_blank");
+    }
+  }
+}
+
 interface IgMedia {
   video?: { video: string; thumbnail: string }[];
   image?: string[];
@@ -301,22 +351,23 @@ export default function IgdlPage() {
                         )}
                       </div>
                       <div className="p-2 mt-auto">
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="neo-btn bg-[#18181b] text-white py-2 font-mono font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-gray-800"
-                        >
-                          {item.type === "video" ? (
-                            <>
-                              <Video className="size-3" /> Download MP4
-                            </>
-                          ) : (
-                            <>
-                              <ImageIcon className="size-3" /> Download Foto
-                            </>
-                          )}
-                        </a>
+                        {item.type === "image" ? (
+                          <button
+                            onClick={() => downloadImage(item.url, "igdl", item.index)}
+                            className="neo-btn bg-[#18181b] text-white py-2 w-full font-mono font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-gray-800"
+                          >
+                            <ImageIcon className="size-3" /> Download Foto
+                          </button>
+                        ) : (
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="neo-btn bg-[#18181b] text-white py-2 font-mono font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-gray-800"
+                          >
+                            <Video className="size-3" /> Download MP4
+                          </a>
+                        )}
                       </div>
                     </div>
                   ))}
