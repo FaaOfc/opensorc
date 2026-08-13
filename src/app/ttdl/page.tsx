@@ -15,6 +15,7 @@ import {
   MessageCircle,
   Share2,
   Images,
+  CheckCircle,
 } from "lucide-react";
 
 interface TtResult {
@@ -36,6 +37,59 @@ interface TtResult {
   wmplay?: string;
   music?: string;
   music_info?: { play: string };
+}
+
+// Direct image download with custom filename
+async function downloadImage(url: string, platform: string, index: number) {
+  const shortId = Math.random().toString(36).slice(2, 7);
+  const filename = `taositw${platform}_photo_${index + 1}_${shortId}.jpg`;
+
+  try {
+    // Try fetch → blob (works for CORS-friendly CDN URLs)
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+  } catch {
+    try {
+      // Fallback: canvas trick (bypass some CORS restrictions)
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject();
+        img.src = url;
+      });
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      canvas.getContext("2d")!.drawImage(img, 0, 0);
+      canvas.toBlob(
+        (b) => {
+          if (!b) return;
+          const blobUrl = URL.createObjectURL(b);
+          const a = document.createElement("a");
+          a.href = blobUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        },
+        "image/jpeg",
+        0.95
+      );
+    } catch {
+      // Final fallback: open in new tab
+      window.open(url, "_blank");
+    }
+  }
 }
 
 function formatNumber(num: number | undefined | null): string {
@@ -324,14 +378,12 @@ export default function TtdlPage() {
                           </span>
                         </div>
                         <div className="p-2 mt-auto">
-                          <a
-                            href={imgUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="neo-btn bg-[#18181b] text-white py-2 font-mono font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-gray-800"
+                          <button
+                            onClick={() => downloadImage(imgUrl, "ttdl", idx)}
+                            className="neo-btn bg-[#18181b] text-white py-2 w-full font-mono font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-gray-800"
                           >
                             <Download className="size-3" /> Download
-                          </a>
+                          </button>
                         </div>
                       </div>
                     ))}
