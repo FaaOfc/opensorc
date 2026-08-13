@@ -51,7 +51,7 @@ export default function Navbar() {
             className="flex items-center gap-2 font-mono font-bold text-lg tracking-tight hover:opacity-80 transition-opacity"
           >
             <Zap className="size-5 text-orange-500" />
-            <span>NefuSite</span>
+            <span>TaoSite</span>
           </Link>
 
           {/* Desktop nav */}
