@@ -169,7 +169,7 @@ export default function ThanksPage() {
       {/* CTA */}
       <div className="neo-card p-5 text-center">
         <p className="font-mono text-sm mb-3" style={{ color: "var(--neo-muted-text)" }}>
-          Ingin berkontribusi? Bisa hubungi kontak dibawah!
+          Ingin berkontribusi? Bisa Follow Github Dibawah!
         </p>
         <a
           href={siteConfig.githubUrl}
