@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "next-themes";
 import Sidebar from "@/components/sidebar";
+import Footer from "@/components/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TaoSite — CDN & ShortURL & Downloader & AI Chat",
+  title: "NefuSite — CDN & ShortURL & Downloader & AI Chat",
   description:
     "Super-efficient multifunction web app. Free CDN hosting, URL shortener, social media downloader, and AI chat.",
 };
@@ -35,9 +36,12 @@ export default function RootLayout({
           <div className="min-h-screen flex bg-[var(--neo-page-bg)]">
             <Sidebar />
             {/* Mobile top offset */}
-            <main className="flex-1 sm:mt-0 mt-12 min-h-screen">
-              {children}
-            </main>
+            <div className="flex-1 sm:mt-0 mt-12 min-h-screen flex flex-col">
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+            </div>
           </div>
           <Toaster />
         </ThemeProvider>

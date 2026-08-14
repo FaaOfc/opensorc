@@ -17,7 +17,7 @@ import {
   Music2,
   Camera,
   MessageSquare,
-  ExternalLink,
+
   MousePointerClick,
   Server,
   Heart,
@@ -38,7 +38,7 @@ const iconMap = {
 };
 
 const features = [
-  {    
+  {
     id: "cdn",
     title: "CDN Hosting",
     subtitle: "Host any file, any mimetype",
@@ -166,7 +166,7 @@ export default function HomePage() {
     }
     autoPlayRef.current = setInterval(() => {
       goNext();
-    }, 4000);
+    }, 10000);
     return () => {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
@@ -363,18 +363,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8" style={{ borderTop: "2px solid var(--neo-border-color)" }}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 font-mono text-sm" style={{ color: "var(--neo-muted-text)" }}>
-            <Zap className="size-4 text-orange-500" />
-            <span>{siteConfig.siteName} by {siteConfig.authorName}</span>
-          </div>
-          <a href={siteConfig.githubUrl} target="_blank" rel="noopener noreferrer" className="neo-btn bg-[var(--neo-card-bg)] px-4 py-1.5 font-mono text-sm flex items-center gap-2">
-            <Github className="size-4" /> GitHub <ExternalLink className="size-3" />
-          </a>
-        </div>
-      </footer>
     </div>
   );
 }
