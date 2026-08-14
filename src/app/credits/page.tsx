@@ -50,7 +50,7 @@ export default function CreditsPage() {
           Credits
         </h1>
         <p className="font-mono text-sm" style={{ color: "var(--neo-muted-text)" }}>
-          Library dan teknologi open-source yang menjadi fondasi NefuSite.
+          Library dan teknologi open-source yang menjadi fondasi TaoSite.
         </p>
       </div>
 
@@ -102,7 +102,7 @@ export default function CreditsPage() {
       {/* OSS Love */}
       <div className="neo-card p-5 mt-8 text-center">
         <p className="font-mono text-sm" style={{ color: "var(--neo-muted-text)" }}>
-          NefuSite tidak akan ada tanpa komunitas open-source. Terima kasih kepada
+          Taosite tidak akan ada tanpa komunitas open-source. Terima kasih kepada
           semua maintainer dan kontributor library di atas!
         </p>
         <div className="flex justify-center gap-2 mt-3">
