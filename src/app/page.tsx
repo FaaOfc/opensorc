@@ -166,7 +166,7 @@ export default function HomePage() {
     }
     autoPlayRef.current = setInterval(() => {
       goNext();
-    }, 10000);
+    }, 4000);
     return () => {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
