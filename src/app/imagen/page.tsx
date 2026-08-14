@@ -53,7 +53,7 @@ export default function ImagenPage() {
     if (!image) return;
     const a = document.createElement("a");
     a.href = image;
-    a.download = `nefu-imagen-${Date.now()}.png`;
+    a.download = `taosite-imagen-${Date.now()}.png`;
     a.click();
   };
 
@@ -69,6 +69,9 @@ export default function ImagenPage() {
         </h1>
         <p className="font-mono text-sm" style={{ color: "var(--neo-muted-text)" }}>
           Buat gambar dari deskripsi teks menggunakan AI
+        </p>
+        <p className="font-mono text-sm" style={{ color: "var(--neo-muted-text)" }}>
+          ( Jangan refresh sebelum image muncul )
         </p>
       </div>
 
