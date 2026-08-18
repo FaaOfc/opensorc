@@ -90,7 +90,7 @@ export default function Footer() {
               style={{ color: "var(--neo-muted-text)" }}
             >
               {siteConfig.tagline}. Host files, shorten URLs, download media,
-              chat with AI — all in one place.
+              chat with AI, all in one place.
             </p>
           </div>
 
@@ -148,7 +148,7 @@ export default function Footer() {
           style={{ borderBottom: "1px dashed var(--neo-border-color)" }}
         />
 
-        {/* Bottom row: Copyright + GitHub source link */}
+        {/* Bottom row: Copyright + GitHub link */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <p
             className="font-mono text-xs"
