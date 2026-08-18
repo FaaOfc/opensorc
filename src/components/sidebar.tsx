@@ -17,6 +17,7 @@ import {
   ImageIcon,
   Languages,
   ImageDown,
+  AudioWaveform,
   ZoomIn,
   Sun,
   Moon,
@@ -40,6 +41,7 @@ const mainNav = [
   { href: "/translate", label: "Translate", icon: Languages },
   { href: "/compress", label: "Compress", icon: ImageDown },
   { href: "/upscaler", label: "Upscaler", icon: ZoomIn },
+  { href: "/tts", label: "TTS", icon: AudioWaveform },
 ];
 
 const infoNav = [
