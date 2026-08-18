@@ -26,7 +26,7 @@ const values = [
   {
     title: "Gratis Selamanya",
     description:
-      "Semua fitur di Taosite sepenuhnya gratis. Kami memanfaatkan infrastruktur zero-cost seperti GitHub API untuk hosting dan penyimpanan, sehingga tidak ada biaya server yang dibebankan ke pengguna.",
+      "Semua fitur di Taosite sepenuhnya gratis. Kami memanfaatkan infrastruktur yang sudah ada seperti Thinkcetre untuk hosting dan penyimpanan, sehingga tidak ada biaya server yang dibebankan ke pengguna.",
     icon: Zap,
     color: "#f97316",
   },
@@ -65,7 +65,7 @@ export default function AboutPage() {
           About Us
         </h1>
         <p className="font-mono text-sm" style={{ color: "var(--neo-muted-text)" }}>
-          Kenali lebih dekat siapa kami dan mengapa NefuSite dibuat.
+          Kenali lebih dekat siapa kami dan mengapa TaoSite dibuat.
         </p>
       </div>
 
