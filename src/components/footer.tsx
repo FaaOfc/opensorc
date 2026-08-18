@@ -29,6 +29,7 @@ function TikTokIcon() {
   );
 }
 
+// Social links now use URLs from siteConfig
 const socialLinks = [
   {
     href: siteConfig.githubUrl,
@@ -36,17 +37,17 @@ const socialLinks = [
     color: "#18181b",
   },
   {
-    href: "https://instagram.com/fnrkyy",
+    href: siteConfig.instagramUrl,
     label: "Instagram",
     color: "#e4405f",
   },
   {
-    href: "https://tiktok.com/@_xxcrazykillerx_",
+    href: siteConfig.tiktokUrl,
     label: "TikTok",
     color: "#000000",
   },
   {
-    href: "mailto:faanrky@gmail.com",
+    href: siteConfig.emailUrl,
     label: "Email",
     color: "#ea580c",
   },
@@ -154,7 +155,7 @@ export default function Footer() {
             style={{ color: "var(--neo-muted-text)" }}
           >
             &copy; {new Date().getFullYear()} {siteConfig.authorName}. Built with{" "}
-            <span className="text-orange-500">&#9829;</span>.
+            <span className="text-orange-500">&#9829;</span> and open source.
           </p>
           <a
             href={siteConfig.githubUrl}
@@ -170,5 +171,4 @@ export default function Footer() {
       </div>
     </footer>
   );
-        }
-                    
+}
