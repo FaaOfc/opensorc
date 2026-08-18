@@ -17,7 +17,7 @@ import {
   ImageIcon,
   Languages,
   ImageDown,
-  AudioLines,
+  ZoomIn,
   Sun,
   Moon,
   Menu,
@@ -39,7 +39,7 @@ const mainNav = [
   { href: "/imagen", label: "AI Image", icon: ImageIcon },
   { href: "/translate", label: "Translate", icon: Languages },
   { href: "/compress", label: "Compress", icon: ImageDown },
-  { href: "/tts", label: "AI TTS", icon: AudioLines },
+  { href: "/upscaler", label: "Upscaler", icon: ZoomIn },
 ];
 
 const infoNav = [
