@@ -107,13 +107,13 @@ export default function CreditsPage() {
         </p>
         <div className="flex justify-center gap-2 mt-3">
           <a
-            href="https://github.com/alip-jmbd/NefuSite"
+            href="https://github.com/FaaOfc"
             target="_blank"
             rel="noopener noreferrer"
             className="neo-btn inline-flex items-center gap-2 px-4 py-2 font-mono text-xs bg-emerald-500 text-white hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_var(--neo-shadow-color)] transition-all"
           >
             <Github className="size-3.5" />
-            Star di GitHub
+            Follow di GitHub
             <ExternalLink className="size-3" />
           </a>
         </div>
