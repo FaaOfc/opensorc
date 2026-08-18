@@ -1,54 +1,75 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { AudioLines, Loader2, Play, Pause, Download, Volume2 } from "lucide-react";
+import { ZoomIn, Loader2, Download, Upload, AlertCircle, Expand } from "lucide-react";
 
-const voices = [
-  { id: "tongtong", label: "Tongtong", desc: "Default" },
-  { id: "xiaoyi", label: "Xiaoyi", desc: "Chinese" },
-  { id: "echo", label: "Echo", desc: "English" },
-  { id: "shimmer", label: "Shimmer", desc: "English" },
-  { id: "alloy", label: "Alloy", desc: "English" },
-  { id: "fable", label: "Fable", desc: "English" },
-  { id: "onyx", label: "Onyx", desc: "English" },
-  { id: "nova", label: "Nova", desc: "English" },
-];
+function formatSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
-export default function TTSPage() {
-  const [text, setText] = useState("");
-  const [voice, setVoice] = useState("tongtong");
-  const [speed, setSpeed] = useState(1.0);
-  const [audioFormat, setAudioFormat] = useState("mp3");
-  const [audioSrc, setAudioSrc] = useState<string | null>(null);
+export default function UpscalerPage() {
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [scale, setScale] = useState(2);
+  const [result, setResult] = useState<{
+    image: string;
+    originalWidth: number;
+    originalHeight: number;
+    newWidth: number;
+    newHeight: number;
+    scale: number;
+    originalSize: number;
+    newSize: number;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [playing, setPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [comparing, setComparing] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleGenerate = async () => {
-    if (!text.trim() || loading) return;
+  const handleFileSelect = (f: File) => {
+    if (!f.type.startsWith("image/")) {
+      setError("Hanya file gambar yang didukung.");
+      return;
+    }
+    setFile(f);
+    setError("");
+    setResult(null);
+    const reader = new FileReader();
+    reader.onload = () => setPreview(reader.result as string);
+    reader.readAsDataURL(f);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const f = e.dataTransfer.files[0];
+    if (f) handleFileSelect(f);
+  };
+
+  const handleUpscale = async () => {
+    if (!file || loading) return;
     setLoading(true);
     setError("");
-    setAudioSrc(null);
-    setPlaying(false);
+    setResult(null);
 
     try {
-      const res = await fetch("/api/tts", {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("scale", String(scale));
+
+      const res = await fetch("/api/upscaler", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: text.trim(),
-          voice,
-          speed,
-          format: audioFormat,
-        }),
+        body: formData,
       });
 
       const data = await res.json();
       if (data.error) {
         setError(data.error);
-      } else if (data.audio) {
-        setAudioSrc(data.audio);
+      } else {
+        setResult(data);
       }
     } catch {
       setError("Gagal menghubungi server.");
@@ -57,188 +78,220 @@ export default function TTSPage() {
     }
   };
 
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (playing) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-    setPlaying(!playing);
+  const handleDownload = () => {
+    if (!result) return;
+    const a = document.createElement("a");
+    a.href = result.image;
+    a.download = `nefu-upscale-${result.scale}x-${Date.now()}.jpg`;
+    a.click();
   };
 
-  const handleDownload = () => {
-    if (!audioSrc) return;
-    const a = document.createElement("a");
-    a.href = audioSrc;
-    a.download = `nefu-tts-${Date.now()}.${audioFormat}`;
-    a.click();
+  const handleReset = () => {
+    setFile(null);
+    setPreview(null);
+    setResult(null);
+    setError("");
   };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center neo-border rounded-xl p-4 bg-purple-50 dark:bg-purple-950 mb-4">
-          <AudioLines className="size-8 text-purple-600" />
+        <div className="inline-flex items-center justify-center neo-border rounded-xl p-4 bg-sky-50 dark:bg-sky-950 mb-4">
+          <ZoomIn className="size-8 text-sky-600" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-mono font-bold mb-2">
-          AI Text-to-Speech
+          Image Upscaler
         </h1>
         <p className="font-mono text-sm" style={{ color: "var(--neo-muted-text)" }}>
-          Ubah teks menjadi suara AI yang natural
+          Perbesar resolusi gambar hingga 4x dengan kualitas tinggi
         </p>
       </div>
 
-      {/* Input */}
-      <div className="neo-card p-5 mb-4">
-        <label className="font-mono font-bold text-xs block mb-2">
-          Teks yang ingin diubah ke suara
-        </label>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Contoh: Selamat datang di NefuSite, platform tools gratis untuk semua!"
-          disabled={loading}
-          maxLength={5000}
-          className="neo-border rounded-lg w-full px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 bg-[var(--neo-card-bg)] resize-none h-28"
-        />
-        <div className="flex items-center justify-between mt-1">
-          <span className="font-mono text-xs" style={{ color: "var(--neo-muted-text)" }}>
-            {text.length} / 5000
-          </span>
+      {/* Upload area */}
+      {!file ? (
+        <div
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
+          onClick={() => inputRef.current?.click()}
+          className={`neo-card p-8 text-center cursor-pointer transition-all ${
+            dragOver ? "bg-sky-50 dark:bg-sky-950 scale-[1.02]" : ""
+          }`}
+        >
+          <Upload className="size-8 mx-auto mb-3 text-sky-500" />
+          <p className="font-mono font-bold text-sm mb-1">Drag & drop gambar di sini</p>
+          <p className="font-mono text-xs" style={{ color: "var(--neo-muted-text)" }}>
+            atau klik untuk pilih file — PNG, JPG, WebP
+          </p>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+          />
         </div>
-      </div>
+      ) : (
+        <>
+          {/* Preview original */}
+          <div className="neo-card p-5 mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <label className="font-mono font-bold text-xs">Gambar Asli</label>
+              <button onClick={handleReset} className="font-mono text-xs hover:text-sky-500" style={{ color: "var(--neo-muted-text)" }}>
+                Ganti gambar
+              </button>
+            </div>
+            <div className="neo-border rounded-lg overflow-hidden mb-2">
+              <img src={preview!} alt="Preview" className="w-full h-auto max-h-56 object-contain bg-[var(--neo-page-bg)]" />
+            </div>
+            <p className="font-mono text-xs" style={{ color: "var(--neo-muted-text)" }}>
+              {file.name} — {formatSize(file.size)}
+            </p>
+          </div>
 
-      {/* Settings */}
-      <div className="neo-card p-5 mb-4">
-        <h3 className="font-mono font-bold text-xs mb-3 flex items-center gap-2">
-          <Volume2 className="size-3.5" />
-          Pengaturan Suara
-        </h3>
-
-        {/* Voice selection */}
-        <div className="mb-4">
-          <label className="font-mono text-xs block mb-2">Suara</label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {voices.map((v) => (
+          {/* Scale selector */}
+          <div className="neo-card p-5 mb-4">
+            <h3 className="font-mono font-bold text-xs mb-3 flex items-center gap-2">
+              <Expand className="size-3.5" />
+              Skala Upscale
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
               <button
-                key={v.id}
-                onClick={() => setVoice(v.id)}
-                className={`neo-btn px-2 py-2 font-mono text-xs text-center transition-all ${
-                  voice === v.id
-                    ? "bg-purple-600 text-white shadow-none"
+                onClick={() => setScale(2)}
+                className={`neo-btn px-4 py-3 font-mono text-sm text-center transition-all ${
+                  scale === 2
+                    ? "bg-sky-600 text-white shadow-none"
                     : "bg-[var(--neo-card-bg)]"
                 }`}
               >
-                <span className="block font-bold">{v.label}</span>
-                <span className="block text-[10px] opacity-70">{v.desc}</span>
+                <span className="block font-bold text-lg">2x</span>
+                <span className="block text-xs opacity-80">Double resolution</span>
               </button>
-            ))}
+              <button
+                onClick={() => setScale(4)}
+                className={`neo-btn px-4 py-3 font-mono text-sm text-center transition-all ${
+                  scale === 4
+                    ? "bg-sky-600 text-white shadow-none"
+                    : "bg-[var(--neo-card-bg)]"
+                }`}
+              >
+                <span className="block font-bold text-lg">4x</span>
+                <span className="block text-xs opacity-80">Quadruple resolution</span>
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Speed */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-1">
-            <label className="font-mono text-xs">Kecepatan</label>
-            <span className="font-mono text-xs font-bold">{speed.toFixed(1)}x</span>
-          </div>
-          <input
-            type="range"
-            min={0.5}
-            max={2.0}
-            step={0.1}
-            value={speed}
-            onChange={(e) => setSpeed(Number(e.target.value))}
-            className="w-full accent-purple-600"
-          />
-        </div>
-
-        {/* Format */}
-        <div>
-          <label className="font-mono text-xs block mb-1">Format Audio</label>
-          <select
-            value={audioFormat}
-            onChange={(e) => setAudioFormat(e.target.value)}
-            className="neo-border rounded-lg w-full px-3 py-2 font-mono text-sm bg-[var(--neo-card-bg)] focus:outline-none focus:ring-2 focus:ring-purple-300"
+          {/* Upscale button */}
+          <button
+            onClick={handleUpscale}
+            disabled={loading}
+            className={`neo-btn w-full px-4 py-2.5 font-mono font-medium text-sm flex items-center justify-center gap-2 mb-4 ${
+              loading
+                ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed shadow-none"
+                : "bg-sky-600 text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_var(--neo-shadow-color)] transition-all"
+            }`}
           >
-            <option value="mp3">MP3 (ukuran kecil)</option>
-            <option value="wav">WAV (kualitas tinggi)</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Generate button */}
-      <button
-        onClick={handleGenerate}
-        disabled={!text.trim() || loading}
-        className={`neo-btn w-full px-4 py-2.5 font-mono font-medium text-sm flex items-center justify-center gap-2 mb-4 ${
-          !text.trim() || loading
-            ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed shadow-none"
-            : "bg-purple-600 text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_var(--neo-shadow-color)] transition-all"
-        }`}
-      >
-        {loading ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            Membuat audio...
-          </>
-        ) : (
-          <>
-            <AudioLines className="size-4" />
-            Buat Audio
-          </>
-        )}
-      </button>
+            {loading ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Upscaling {scale}x...
+              </>
+            ) : (
+              <>
+                <ZoomIn className="size-4" />
+                Upscale {scale}x
+              </>
+            )}
+          </button>
+        </>
+      )}
 
       {/* Error */}
       {error && (
         <div className="neo-card p-4 mb-4 border-red-500 bg-red-50 dark:bg-red-950">
-          <p className="text-red-600 dark:text-red-400 font-mono text-sm">{error}</p>
+          <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-mono text-sm">
+            <AlertCircle className="size-4 shrink-0" />
+            {error}
+          </div>
         </div>
       )}
 
-      {/* Audio result */}
-      {audioSrc && (
+      {/* Result */}
+      {result && (
         <div className="neo-card p-5">
-          <h3 className="font-mono font-bold text-sm mb-3">Hasil Audio</h3>
+          <h3 className="font-mono font-bold text-sm mb-3">Hasil Upscale</h3>
 
-          <audio
-            ref={audioRef}
-            src={audioSrc}
-            onEnded={() => setPlaying(false)}
-            className="hidden"
-          />
-
-          {/* Play/Pause */}
-          <div className="flex items-center gap-3 mb-4">
-            <button
-              onClick={togglePlay}
-              className="neo-btn p-3 bg-purple-50 dark:bg-purple-950 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_var(--neo-shadow-color)] transition-all"
-            >
-              {playing ? (
-                <Pause className="size-5 text-purple-600" />
-              ) : (
-                <Play className="size-5 text-purple-600" />
-              )}
-            </button>
-            <div className="flex-1">
-              <div className="neo-border rounded-full h-3 overflow-hidden">
-                <div
-                  className="h-full bg-purple-500 rounded-full transition-all"
-                  style={{ width: playing ? "100%" : "0%" }}
-                />
-              </div>
+          {/* Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            <div className="neo-border rounded-lg p-3 text-center">
+              <p className="font-mono text-[10px]" style={{ color: "var(--neo-muted-text)" }}>Asli</p>
+              <p className="font-mono font-bold text-sm">{result.originalWidth}×{result.originalHeight}</p>
+            </div>
+            <div className="neo-border rounded-lg p-3 text-center">
+              <p className="font-mono text-[10px]" style={{ color: "var(--neo-muted-text)" }}>Upscaled</p>
+              <p className="font-mono font-bold text-sm text-sky-600">{result.newWidth}×{result.newHeight}</p>
+            </div>
+            <div className="neo-border rounded-lg p-3 text-center">
+              <p className="font-mono text-[10px]" style={{ color: "var(--neo-muted-text)" }}>Skala</p>
+              <p className="font-mono font-bold text-sm text-sky-600">{result.scale}x</p>
+            </div>
+            <div className="neo-border rounded-lg p-3 text-center">
+              <p className="font-mono text-[10px]" style={{ color: "var(--neo-muted-text)" }}>Ukuran</p>
+              <p className="font-mono font-bold text-sm">{formatSize(result.newSize)}</p>
             </div>
           </div>
 
+          {/* Compare toggle */}
+          <div className="flex items-center gap-3 mb-3">
+            <button
+              onClick={() => setComparing(false)}
+              className={`font-mono text-xs px-3 py-1.5 rounded-md transition-all ${
+                !comparing ? "bg-sky-600 text-white" : "hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+              style={!comparing ? {} : { color: "var(--neo-muted-text)" }}
+            >
+              Hasil
+            </button>
+            <button
+              onClick={() => setComparing(true)}
+              className={`font-mono text-xs px-3 py-1.5 rounded-md transition-all ${
+                comparing ? "bg-sky-600 text-white" : "hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+              style={comparing ? {} : { color: "var(--neo-muted-text)" }}
+            >
+              Compare
+            </button>
+          </div>
+
+          {/* Image display */}
+          {comparing ? (
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div>
+                <p className="font-mono text-[10px] mb-1 text-center" style={{ color: "var(--neo-muted-text)" }}>Before</p>
+                <div className="neo-border rounded-lg overflow-hidden">
+                  <img src={preview!} alt="Original" className="w-full h-auto max-h-64 object-contain bg-[var(--neo-page-bg)]" />
+                </div>
+              </div>
+              <div>
+                <p className="font-mono text-[10px] mb-1 text-center" style={{ color: "var(--neo-muted-text)" }}>After ({result.scale}x)</p>
+                <div className="neo-border rounded-lg overflow-hidden">
+                  <img src={result.image} alt="Upscaled" className="w-full h-auto max-h-64 object-contain bg-[var(--neo-page-bg)]" />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="neo-border rounded-lg overflow-hidden mb-4">
+              <img src={result.image} alt="Upscaled" className="w-full h-auto max-h-72 object-contain bg-[var(--neo-page-bg)]" />
+            </div>
+          )}
+
           <button
             onClick={handleDownload}
-            className="neo-btn w-full px-4 py-2.5 font-mono font-medium text-sm flex items-center justify-center gap-2 bg-purple-600 text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_var(--neo-shadow-color)] transition-all"
+            className="neo-btn w-full px-4 py-2.5 font-mono font-medium text-sm flex items-center justify-center gap-2 bg-sky-600 text-white hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[5px_5px_0px_var(--neo-shadow-color)] transition-all"
           >
             <Download className="size-4" />
-            Download Audio
+            Download Upscaled Image
           </button>
         </div>
       )}
