@@ -1,14 +1,18 @@
 // Site configuration — customize these values
 export const siteConfig = {
-  siteName: "Tao-Site",
-  authorName: "Hutao's husband",
+  siteName: "NefuSite",
+  authorName: "NefuSoft",
   tagline: "Super-efficient multifunction web app",
   description:
     "A personal project for file hosting and URL shortening, powered by GitHub as a free database and storage backend.",
   profilePicture: "https://cdn.nefyu.my.id/csy1.jpg",
   profileBanner: "https://cdn.nefyu.my.id/cgxl.png",
   backgroundImage: "https://cdn.nefyu.my.id/1lsq.webp",
-  githubUrl: "https://github.com/FaaOfc",
+  githubUrl: "https://github.com/alip-jmbd/NefuSite",
+  // Social media URLs — update these to your real accounts
+  instagramUrl: "https://instagram.com/nefusoft",
+  tiktokUrl: "https://tiktok.com/@nefusoft",
+  emailUrl: "mailto:nefusoft@gmail.com",
 };
 
 // Feature descriptions for the homepage
