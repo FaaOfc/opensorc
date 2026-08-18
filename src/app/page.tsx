@@ -23,6 +23,9 @@ import {
   Heart,
   Monitor,
   ImageIcon,
+  Languages,
+  ImageDown,
+  ZoomIn,
 } from "lucide-react";
 import { siteConfig } from "@/lib/config";
 
@@ -35,6 +38,9 @@ const iconMap = {
   heart: Heart,
   monitor: Monitor,
   image: ImageIcon,
+  languages: Languages,
+  imagedown: ImageDown,
+  zoomin: ZoomIn,
 };
 
 const features = [
@@ -43,7 +49,7 @@ const features = [
     title: "CDN Hosting",
     subtitle: "Host any file, any mimetype",
     description:
-      "Upload images, videos, documents, executables — anything. Your files are stored on Server and served through your own domain with proper MIME types.",
+      "Upload images, videos, documents, executables — anything. Your files are stored on GitHub and served through your own domain with proper MIME types.",
     icon: "upload-cloud" as const,
     color: "#f97316",
   },
@@ -52,7 +58,7 @@ const features = [
     title: "URL Shortener",
     subtitle: "Shorten any URL instantly",
     description:
-      "Transform long URLs into short, shareable links. Optionally customize your short codes. All mappings stored in a Database.",
+      "Transform long URLs into short, shareable links. Optionally customize your short codes. All mappings stored in a GitHub Gist — zero cost.",
     icon: "link" as const,
     color: "#10b981",
   },
@@ -88,7 +94,7 @@ const features = [
     title: "AI Chat",
     subtitle: "Chat gratis tanpa login",
     description:
-      "Chat dengan AI gratis tanpa perlu akun. 24 model premium - GPT-5.5, Claude Opus 4.8, Gemini 3.1 Pro, Grok 4.1, dan lainnya.",
+      "Chat dengan AI gratis tanpa perlu akun. 24 model premium — GPT-5.5, Claude Opus 4.8, Gemini 3.1 Pro, Grok 4.1, dan lainnya.",
     icon: "message" as const,
     color: "#7c3aed",
   },
@@ -97,7 +103,7 @@ const features = [
     title: "AI Waifu",
     subtitle: "Chat dengan karakter waifu",
     description:
-      "Roleplay dengan karakter anime favoritmu! Pilih dari preset Hu Tao, Nahida, Ai Hoshino, Zero Two, Marin, Shinobu atau buat custom.",
+      "Roleplay dengan karakter anime favoritmu! Pilih dari preset Hu Tao, Nahida, Ai Hoshino, Zero Two, Marin, Shinobu — atau buat custom.",
     icon: "heart" as const,
     color: "#14b8a6",
   },
@@ -110,6 +116,33 @@ const features = [
     icon: "image" as const,
     color: "#e11d48",
   },
+  {
+    id: "translate",
+    title: "AI Translator",
+    subtitle: "Terjemahkan teks instan",
+    description:
+      "Terjemahkan teks ke 30+ bahasa secara instan menggunakan AI. Support deteksi bahasa otomatis dan swap bahasa satu klik.",
+    icon: "languages" as const,
+    color: "#2563eb",
+  },
+  {
+    id: "compress",
+    title: "Image Compressor",
+    subtitle: "Kompres & resize gambar",
+    description:
+      "Kurangi ukuran file gambar tanpa hilang kualitas. Atur kualitas, dimensi, dan format output — PNG, JPG, atau WebP.",
+    icon: "imagedown" as const,
+    color: "#059669",
+  },
+  {
+    id: "upscaler",
+    title: "Image Upscaler",
+    subtitle: "Perbesar resolusi gambar",
+    description:
+      "Upscale gambar hingga 4x resolusi dengan kualitas tinggi. Pilih 2x atau 4x, compare before/after, dan download hasilnya.",
+    icon: "zoomin" as const,
+    color: "#0284c7",
+  },
 ];
 
 const routeMap: Record<string, string> = {
@@ -121,6 +154,9 @@ const routeMap: Record<string, string> = {
   chat: "/chat",
   waifu: "/ai-waifu",
   imagen: "/imagen",
+  translate: "/translate",
+  compress: "/compress",
+  upscaler: "/upscaler",
 };
 
 export default function HomePage() {
@@ -327,7 +363,7 @@ export default function HomePage() {
               { icon: <Cloud className="size-5" />, label: "Free CDN", desc: "No cost hosting" },
               { icon: <Zap className="size-5" />, label: "Instant", desc: "Sub-second uploads" },
               { icon: <Shield className="size-5" />, label: "Secure", desc: "GitHub-backed" },
-              { icon: <Globe className="size-5" />, label: "8 Tools", desc: "All in one app" },
+              { icon: <Globe className="size-5" />, label: "11 Tools", desc: "All in one app" },
             ].map((stat) => (
               <div key={stat.label} className="neo-card p-4 text-center animate-slide-up">
                 <div className="flex justify-center mb-2 text-orange-500">{stat.icon}</div>
@@ -349,7 +385,7 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-3 gap-4">
             {[
               { step: "01", title: "Upload / Input", desc: "Drag file untuk CDN, masukkan URL, atau chat dengan AI", icon: <MousePointerClick className="size-6" /> },
-              { step: "02", title: "Proses Otomatis", desc: "File ke Server, URL ke Database, media diproses, AI merespons", icon: <Server className="size-6" /> },
+              { step: "02", title: "Proses Otomatis", desc: "File ke GitHub, URL ke Gist, media diproses, AI merespons", icon: <Server className="size-6" /> },
               { step: "03", title: "Hasil Instan!", desc: "Dapatkan URL, download media, atau baca respons AI", icon: <Globe className="size-6" /> },
             ].map((item) => (
               <div key={item.step} className="neo-card p-5 sm:p-6 text-center">
