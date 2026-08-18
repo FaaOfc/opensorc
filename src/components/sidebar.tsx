@@ -71,7 +71,7 @@ export default function Sidebar() {
       >
         <Zap className="size-5 text-orange-500 shrink-0" />
         <span className="font-mono font-bold text-base tracking-tight truncate">
-          NefuSite
+          TaoSite
         </span>
       </div>
 
