@@ -58,7 +58,7 @@ export default function ShorturlPage() {
             <Link className="size-8 text-emerald-500" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-mono font-bold mb-1">
-            URL Shortener - Maintenance
+            URL Shortener
           </h1>
           <p className="text-sm text-gray-600 font-mono">
             Pendekkan URL panjang jadi link singkat
