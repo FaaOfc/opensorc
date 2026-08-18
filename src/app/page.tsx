@@ -28,6 +28,7 @@ import {
   ZoomIn,
 } from "lucide-react";
 import { siteConfig } from "@/lib/config";
+import IntroScreen from "@/components/intro";
 
 const iconMap = {
   "upload-cloud": UploadCloud,
@@ -160,6 +161,24 @@ const routeMap: Record<string, string> = {
 };
 
 export default function HomePage() {
+  const [showIntro, setShowIntro] = useState(false);
+  const [introComplete, setIntroComplete] = useState(false);
+
+  useEffect(() => {
+    const seen = sessionStorage.getItem("tao_intro_seen");
+    if (!seen) {
+      setShowIntro(true);
+    } else {
+      setIntroComplete(true);
+    }
+  }, []);
+
+  const handleIntroComplete = useCallback(() => {
+    sessionStorage.setItem("tao_intro_seen", "1");
+    setShowIntro(false);
+    setIntroComplete(true);
+  }, []);
+
   const [activeIndex, setActiveIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [displayIndex, setDisplayIndex] = useState(0);
@@ -241,7 +260,15 @@ export default function HomePage() {
   const CurrentIcon = iconMap[currentFeature.icon];
 
   return (
-    <div className="flex flex-col">
+    <>
+      {/* Intro Splash Screen */}
+      {showIntro && <IntroScreen onComplete={handleIntroComplete} />}
+
+      <div
+        className={`flex flex-col transition-opacity duration-500 ${
+          introComplete ? "opacity-100" : "opacity-0"
+        }`}
+      >
       {/* Hero Section */}
       <section className="relative overflow-hidden py-12 sm:py-20">
         <div className="absolute inset-0 bg-dots opacity-[0.03]" />
@@ -400,5 +427,6 @@ export default function HomePage() {
       </section>
 
     </div>
+    </>
   );
 }
