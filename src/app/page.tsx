@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import Link from "next/link";
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -202,7 +202,7 @@ export default function HomePage() {
     }
     autoPlayRef.current = setInterval(() => {
       goNext();
-    }, 10000);
+    }, 3000);
     return () => {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
@@ -234,7 +234,7 @@ export default function HomePage() {
   const handleManualNav = (fn: () => void) => {
     setIsPaused(true);
     fn();
-    setTimeout(() => setIsPaused(false), 5000);
+    setTimeout(() => setIsPaused(false), 5000); 
   };
 
   const currentFeature = features[displayIndex];
@@ -255,7 +255,7 @@ export default function HomePage() {
               {siteConfig.siteName}
             </h1>
             <p className="text-base sm:text-lg font-mono max-w-xl mx-auto mb-6" style={{ color: "var(--neo-muted-text)" }}>
-              {siteConfig.tagline}. Host files, shorten URLs, download social media, chat with AI — all in one place.
+              {siteConfig.tagline}. Host files, shorten URLs, download social media, chat with AI,  all in one place.
             </p>
           </div>
         </div>
@@ -385,7 +385,7 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-3 gap-4">
             {[
               { step: "01", title: "Upload / Input", desc: "Drag file untuk CDN, masukkan URL, atau chat dengan AI", icon: <MousePointerClick className="size-6" /> },
-              { step: "02", title: "Proses Otomatis", desc: "File ke GitHub, URL ke Gist, media diproses, AI merespons", icon: <Server className="size-6" /> },
+              { step: "02", title: "Proses Otomatis", desc: "File ke hosting, URL ke Json Database, media diproses, AI merespons", icon: <Server className="size-6" /> },
               { step: "03", title: "Hasil Instan!", desc: "Dapatkan URL, download media, atau baca respons AI", icon: <Globe className="size-6" /> },
             ].map((item) => (
               <div key={item.step} className="neo-card p-5 sm:p-6 text-center">
