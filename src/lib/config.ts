@@ -8,7 +8,7 @@ export const siteConfig = {
   profilePicture: "https://cdn.nefyu.my.id/csy1.jpg",
   profileBanner: "https://cdn.nefyu.my.id/cgxl.png",
   backgroundImage: "https://cdn.nefyu.my.id/1lsq.webp",
-  githubUrl: "https://github.com/alip-jmbd/NefuSite",
+  githubUrl: "https://github.com/FaaOfc",
   // Social media URLs — update these to your real accounts
   instagramUrl: "https://instagram.com/fnrkyy",
   tiktokUrl: "https://tiktok.com/@_xcrazykillerx_",
