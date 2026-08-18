@@ -165,7 +165,7 @@ export default function Sidebar() {
       >
         <div className="flex items-center gap-2 font-mono font-bold text-base">
           <Zap className="size-4 text-orange-500" />
-          NefuSite
+          TaoSite
         </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
