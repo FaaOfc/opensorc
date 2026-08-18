@@ -76,7 +76,7 @@ export default function CdnPage() {
             <UploadCloud className="size-8 text-orange-500" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-mono font-bold mb-1">
-            CDN Hosting - Maintenance
+            CDN Hosting
           </h1>
           <p className="text-sm text-gray-600 font-mono">
             Upload file apapun, dapatkan URL instantly
