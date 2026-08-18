@@ -154,7 +154,7 @@ export default function Footer() {
             style={{ color: "var(--neo-muted-text)" }}
           >
             &copy; {new Date().getFullYear()} {siteConfig.authorName}. Built with{" "}
-            <span className="text-orange-500">&#9829;</span> and open source.
+            <span className="text-orange-500">&#9829;</span>.
           </p>
           <a
             href={siteConfig.githubUrl}
