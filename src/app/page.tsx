@@ -117,6 +117,15 @@ const features = [
     icon: "image" as const,
     color: "#e11d48",
   },
+ {
+    id: "tts",
+    title: "AI Text to Speech",
+    subtitle: "Generate sound dari teks",
+    description:
+      "Buat suara dari teks yang diinginkan menggunakan AI. Cukup ketik prompt dan dapatkan Audio instan. Gratis tanpa login.",
+    icon: "image" as const,
+    color: "#e11d48",
+  },
   {
     id: "translate",
     title: "AI Translator",
