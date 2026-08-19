@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Zap,
   Github,
@@ -68,7 +69,16 @@ function SocialIcon({ label }: { label: string }) {
   }
 }
 
+// Pages where footer is hidden (full-height chat interfaces)
+const FOOTLESS_PAGES = ["/chat", "/ai-waifu"];
+
 export default function Footer() {
+  const pathname = usePathname();
+
+  if (FOOTLESS_PAGES.some((page) => pathname.startsWith(page))) {
+    return null;
+  }
+
   return (
     <footer
       className="mt-auto"
