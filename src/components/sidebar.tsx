@@ -41,7 +41,7 @@ const mainNav = [
   { href: "/translate", label: "Translate", icon: Languages },
   { href: "/compress", label: "Compress", icon: ImageDown },
   { href: "/upscaler", label: "Upscaler", icon: ZoomIn },
-  { href: "/tts", label: "TTS", icon: AudioWaveform },
+  { href: "/tts", label: "Text to Speech", icon: AudioWaveform },
 ];
 
 const infoNav = [
