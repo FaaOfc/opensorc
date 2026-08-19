@@ -93,13 +93,22 @@ const features = [
   {
     id: "chat",
     title: "AI Chat",
-    subtitle: "Chat gratis tanpa login",
+    subtitle: "Chat Ai Multimodel gratis tanpa login",
     description:
       "Chat dengan AI gratis tanpa perlu akun. 24 model premium — GPT-5.5, Claude Opus 4.8, Gemini 3.1 Pro, Grok 4.1, dan lainnya.",
     icon: "message" as const,
     color: "#7c3aed",
   },
   {
+    id: "realtime",
+    title: "AI Realtime",
+    subtitle: "Chat Ai Realtime gratis tanpa login",
+    description:
+      "Chat dengan AI Realtime gratis tanpa perlu akun. Dapatkan hasil Data per hari ini",
+    icon: "message" as const,
+    color: "#7c3aed",
+  {
+  },
     id: "waifu",
     title: "AI Waifu",
     subtitle: "Chat dengan karakter waifu",
