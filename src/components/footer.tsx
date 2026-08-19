@@ -70,7 +70,7 @@ function SocialIcon({ label }: { label: string }) {
 }
 
 // Pages where footer is hidden (full-height chat interfaces)
-const FOOTLESS_PAGES = ["/chat", "/ai-waifu"];
+const FOOTLESS_PAGES = ["/chat", "/realtime", "/ai-waifu"];
 
 export default function Footer() {
   const pathname = usePathname();
