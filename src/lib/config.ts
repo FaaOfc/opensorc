@@ -15,6 +15,10 @@ export const siteConfig = {
   emailUrl: "mailto:faanrky@gmail.com",
 };
 
+export const animeConfig = {
+  baseUrl: "https://api.sansekai.my.id/api/anime",
+};
+
 // Feature descriptions for the homepage
 export const features = [
   {
